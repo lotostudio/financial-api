@@ -1,0 +1,32 @@
+# Multistage dockerfile for building docker images on non-unix systems
+#
+# Build image:
+# docker build -f build/Dockerfile.multi -t financial-api .
+#
+# Run container by passing env variables by flag -e (list of env variables in README.md):
+# docker run -p 8080:8080 financial-api:latest
+#
+# Build binary in separate docker container with golang
+FROM golang:1.15-alpine3.12 AS builder
+
+RUN go version
+
+COPY . /github.com/lotostudio/financial-api/
+WORKDIR /github.com/lotostudio/financial-api/
+
+RUN go get github.com/swaggo/swag/cmd/swag
+RUN swag init -g internal/app/app.go
+
+RUN go mod download
+RUN GOOS=linux go build -ldflags="-w -s" -v -o app ./cmd/main.go
+
+# Transfer artifacts from builder stage to clean alpine container
+FROM alpine:latest
+
+COPY --from=builder /github.com/lotostudio/financial-api/app .
+COPY --from=builder /github.com/lotostudio/financial-api/configs configs/
+COPY --from=builder /github.com/lotostudio/financial-api/db db/
+
+EXPOSE 8080
+
+CMD ["./app"]

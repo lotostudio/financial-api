@@ -1,0 +1,19 @@
+log:
+  level: INFO
+http:
+  port: 8080
+  read-timeout: 10s
+  write-timeout: 10s
+  max-header-megabytes: 1
+db:
+  host: <host>
+  port: <port>
+  name: <db name>
+  user: <username>
+  password: <password>
+  ssl-mode: <mode>
+auth:
+  access-token-ttl: 10m
+  password-salt: <salt>
+  jwt:
+    key: <key>
