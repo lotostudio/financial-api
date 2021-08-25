@@ -15,6 +15,8 @@
 # Transfer artifacts to clean alpine container
 FROM alpine:latest
 
+WORKDIR /root/
+
 COPY app .
 COPY configs/ ./configs/
 COPY db/ ./db/

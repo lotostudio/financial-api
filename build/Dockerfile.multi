@@ -23,6 +23,8 @@ RUN GOOS=linux go build -ldflags="-w -s" -v -o app ./cmd/main.go
 # Transfer artifacts from builder stage to clean alpine container
 FROM alpine:latest
 
+WORKDIR /root/
+
 COPY --from=builder /github.com/lotostudio/financial-api/app .
 COPY --from=builder /github.com/lotostudio/financial-api/configs configs/
 COPY --from=builder /github.com/lotostudio/financial-api/db db/
