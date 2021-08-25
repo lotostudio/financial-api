@@ -92,6 +92,7 @@ jobs:
           path: |
             app
             configs
+            db
           retention-days: 1
 
   docker:
@@ -106,6 +107,9 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: last-built-binary
+
+      - name: Change permission
+        run: chmod +x app
 
       - name: Build Docker Image
         run: docker build -f build/Dockerfile -t ghcr.io/lotostudio/financial-api .
