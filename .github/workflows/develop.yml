@@ -115,6 +115,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: docker
+    environment: dev
 
     steps:
       - name: Run Deploy Script
