@@ -1,10 +1,10 @@
 # Multistage dockerfile for building docker images on non-unix systems
 #
 # Build image:
-# docker build -f build/Dockerfile.multi -t github.com/lotostudio/financial-api .
+# docker build -f build/Dockerfile.multi -t ghcr.io/lotostudio/financial-api .
 #
 # Run container by passing env variables by flag -e (list of env variables in README.md):
-# docker run -p 8080:8080 github.com/lotostudio/financial-api:latest
+# docker run -p 8080:8080 ghcr.io/lotostudio/financial-api:latest
 #
 # Build binary in separate docker container with golang
 FROM golang:1.15-alpine3.12 AS builder

@@ -7,10 +7,10 @@
 # go build -ldflags="-w -s" -v -o app ./cmd/main.go
 #
 # Build image:
-# docker build -f build/Dockerfile -t github.com/lotostudio/financial-api .
+# docker build -f build/Dockerfile -t ghcr.io/lotostudio/financial-api .
 #
 # Run container by passing env variables by flag -e (list of env variables in README.md):
-# docker run -p 8080:8080 github.com/lotostudio/financial-api:latest
+# docker run -p 8080:8080 ghcr.io/lotostudio/financial-api:latest
 #
 # Transfer artifacts to clean alpine container
 FROM alpine:latest
