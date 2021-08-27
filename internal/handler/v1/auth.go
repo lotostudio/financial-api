@@ -29,8 +29,8 @@ func (h *Handler) initAuthRoutes(api *gin.RouterGroup) {
 func (h *Handler) register(c *gin.Context) {
 	var toCreate domain.UserToCreate
 
-	if err := c.BindJSON(&toCreate); err != nil {
-		newResponse(c, http.StatusBadRequest, "invalid request body")
+	if err := c.ShouldBindJSON(&toCreate); err != nil {
+		newResponse(c, http.StatusBadRequest, "invalid request body - "+err.Error())
 		return
 	}
 
@@ -63,8 +63,8 @@ func (h *Handler) register(c *gin.Context) {
 func (h *Handler) login(c *gin.Context) {
 	var toLogin domain.UserToLogin
 
-	if err := c.BindJSON(&toLogin); err != nil {
-		newResponse(c, http.StatusBadRequest, "invalid request body")
+	if err := c.ShouldBindJSON(&toLogin); err != nil {
+		newResponse(c, http.StatusBadRequest, "invalid request body - "+err.Error())
 		return
 	}
 
@@ -80,5 +80,5 @@ func (h *Handler) login(c *gin.Context) {
 		return
 	}
 
-	c.JSONP(http.StatusOK, token)
+	c.JSON(http.StatusOK, token)
 }
