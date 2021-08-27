@@ -46,7 +46,7 @@ func (h *Handler) listUsers(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param input body domain.UserToUpdate true "Data to update"
-// @Success 200 {array} domain.User "Operation finished successfully"
+// @Success 200 {object} domain.User "Operation finished successfully"
 // @Failure 400 {object} response "Invalid request"
 // @Failure 500 {object} response "Server error"
 // @Router /users/me [patch]
