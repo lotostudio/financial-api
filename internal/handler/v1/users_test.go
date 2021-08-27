@@ -129,10 +129,10 @@ func TestHandler_partialUpdateMe(t *testing.T) {
 		},
 		{
 			name:                 "invalid request",
-			requestBody:          "",
+			requestBody:          `{"firstName":""}`,
 			mockBehaviour:        func(s *mockService.MockUsers) {},
 			expectedCodeStatus:   400,
-			expectedResponseBody: `{"message":"invalid request body"}`,
+			expectedResponseBody: `{"message":"invalid request body - Key: 'UserToUpdate.FirstName' Error:Field validation for 'FirstName' failed on the 'alpha' tag"}`,
 		},
 	}
 

@@ -67,8 +67,8 @@ func (h *Handler) partialUpdateMe(c *gin.Context) {
 
 	var toUpdate domain.UserToUpdate
 
-	if err := c.BindJSON(&toUpdate); err != nil {
-		newResponse(c, http.StatusBadRequest, "invalid request body")
+	if err = c.ShouldBindJSON(&toUpdate); err != nil {
+		newResponse(c, http.StatusBadRequest, "invalid request body - "+err.Error())
 		return
 	}
 

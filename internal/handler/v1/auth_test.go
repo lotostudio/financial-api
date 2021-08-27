@@ -46,14 +46,13 @@ func TestHandler_register(t *testing.T) {
 			statusCode:   201,
 			responseBody: `{"id":1,"email":"qweqweqwe@gmail.com","firstName":"Sirius","lastName":"Sam"}`,
 		},
-		//{
-		//	name:          "invalid request body",
-		//	requestBody:   `{}`,
-		//	requestUser:   domain.UserToCreate{},
-		//	mockBehaviour: func(s *mockService.MockAuth, user domain.UserToCreate) {},
-		//	statusCode:    400,
-		//	responseBody:  `{"message":"invalid request body"}`,
-		//},
+		{
+			name:          "invalid request body",
+			requestBody:   `{"firstName": "Sirius", "lastName": "Sam", "email": "qweqweqwe@gmail.com", "password": ""}`,
+			mockBehaviour: func(s *mockService.MockAuth, user domain.UserToCreate) {},
+			statusCode:    400,
+			responseBody:  `{"message":"invalid request body - Key: 'UserToCreate.Password' Error:Field validation for 'Password' failed on the 'required' tag"}`,
+		},
 		{
 			name:        "user already exists",
 			requestBody: `{"firstName": "Sirius", "lastName": "Sam", "email": "qweqweqwe@gmail.com", "password": "qweqweqwe"}`,
@@ -129,14 +128,13 @@ func TestHandler_login(t *testing.T) {
 			statusCode:   200,
 			responseBody: `{"accessToken":"token"}`,
 		},
-		//{
-		//	name:          "invalid request body",
-		//	requestBody:   `{"email": "qweqweqwe", "password": "qweqweqwe"}`,
-		//	requestUser:   domain.UserToLogin{},
-		//	mockBehaviour: func(s *mockService.MockAuth, user domain.UserToLogin) {},
-		//	statusCode:    400,
-		//	responseBody:  `{"message":"invalid request body"}`,
-		//},
+		{
+			name:          "invalid request body",
+			requestBody:   `{"email": "qweqweqwe", "password": "qweqweqwe"}`,
+			mockBehaviour: func(s *mockService.MockAuth, user domain.UserToLogin) {},
+			statusCode:    400,
+			responseBody:  `{"message":"invalid request body - Key: 'UserToLogin.Email' Error:Field validation for 'Email' failed on the 'email' tag"}`,
+		},
 		{
 			name:        "user does not exists",
 			requestBody: `{"email": "qweqweqwe@gmail.com", "password": "qweqweqwe"}`,
