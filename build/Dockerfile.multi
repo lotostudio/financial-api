@@ -1,18 +1,18 @@
 # Multistage dockerfile for building docker images on non-unix systems
 #
 # Build image:
-# docker build -f build/Dockerfile.multi -t financial-api .
+# docker build -f build/Dockerfile.multi -t ghcr.io/lotostudio/financial-api .
 #
 # Run container by passing env variables by flag -e (list of env variables in README.md):
-# docker run -p 8080:8080 financial-api:latest
+# docker run -p 8080:8080 ghcr.io/lotostudio/financial-api:latest
 #
 # Build binary in separate docker container with golang
 FROM golang:1.15-alpine3.12 AS builder
 
 RUN go version
 
-COPY . /github.com/lotostudio/financial-api/
-WORKDIR /github.com/lotostudio/financial-api/
+COPY . .
+WORKDIR /root/
 
 RUN go get github.com/swaggo/swag/cmd/swag
 RUN swag init -g internal/app/app.go
@@ -25,9 +25,7 @@ FROM alpine:latest
 
 WORKDIR /root/
 
-COPY --from=builder /github.com/lotostudio/financial-api/app .
-COPY --from=builder /github.com/lotostudio/financial-api/configs configs/
-COPY --from=builder /github.com/lotostudio/financial-api/db db/
+COPY --from=builder . .
 
 EXPOSE 8080
 
