@@ -3,10 +3,12 @@ package repo
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 	"github.com/lotostudio/financial-api/internal/domain"
 	log "github.com/sirupsen/logrus"
+	"strings"
 )
 
 type UsersRepo struct {
@@ -79,4 +81,43 @@ func (r *UsersRepo) GetByCredentials(ctx context.Context, email, password string
 	}
 
 	return item, nil
+}
+
+func (r *UsersRepo) UpdatePassword(ctx context.Context, userID int64, toUpdate domain.UserToUpdate) (domain.User, error) {
+	var user domain.User
+
+	setValues := make([]string, 0)
+	args := make([]interface{}, 0)
+	argId := 1
+
+	if toUpdate.FirstName != nil {
+		setValues = append(setValues, fmt.Sprintf("first_name=$%d", argId))
+		args = append(args, *toUpdate.FirstName)
+		argId++
+	}
+
+	if toUpdate.LastName != nil {
+		setValues = append(setValues, fmt.Sprintf("last_name=$%d", argId))
+		args = append(args, *toUpdate.LastName)
+		argId++
+	}
+
+	if toUpdate.Password != nil {
+		setValues = append(setValues, fmt.Sprintf("password=$%d", argId))
+		args = append(args, *toUpdate.Password)
+		argId++
+	}
+
+	setQuery := strings.Join(setValues, ", ")
+
+	query := fmt.Sprintf(`UPDATE users u SET %s WHERE u.id = $%d RETURNING u.*`, setQuery, argId)
+	args = append(args, userID)
+
+	err := r.db.GetContext(ctx, &user, query, args...)
+
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	return user, nil
 }

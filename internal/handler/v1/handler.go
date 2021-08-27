@@ -3,15 +3,18 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/lotostudio/financial-api/internal/service"
+	"github.com/lotostudio/financial-api/pkg/auth"
 )
 
 type Handler struct {
-	services *service.Services
+	services     *service.Services
+	tokenManager auth.TokenManager
 }
 
-func NewHandler(services *service.Services) *Handler {
+func NewHandler(services *service.Services, tokenManager auth.TokenManager) *Handler {
 	return &Handler{
-		services: services,
+		services:     services,
+		tokenManager: tokenManager,
 	}
 }
 

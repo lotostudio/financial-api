@@ -12,6 +12,7 @@ import (
 
 type Users interface {
 	List(ctx context.Context) ([]domain.User, error)
+	UpdatePassword(ctx context.Context, userID int64, toUpdate domain.UserToUpdate) (domain.User, error)
 }
 
 type Auth interface {
@@ -26,7 +27,7 @@ type Services struct {
 
 func NewServices(repos *repo.Repos, hasher hash.PasswordHasher, tokenManager auth.TokenManager) *Services {
 	return &Services{
-		Users: newUsersService(repos.Users),
+		Users: newUsersService(repos.Users, hasher),
 		Auth:  newAuthService(repos.Users, hasher, tokenManager),
 	}
 }
