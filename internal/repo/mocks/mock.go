@@ -94,3 +94,18 @@ func (mr *MockUsersMockRecorder) List(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockUsers)(nil).List), ctx)
 }
+
+// UpdatePassword mocks base method.
+func (m *MockUsers) UpdatePassword(ctx context.Context, userID int64, toUpdate domain.UserToUpdate) (domain.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdatePassword", ctx, userID, toUpdate)
+	ret0, _ := ret[0].(domain.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdatePassword indicates an expected call of UpdatePassword.
+func (mr *MockUsersMockRecorder) UpdatePassword(ctx, userID, toUpdate interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePassword", reflect.TypeOf((*MockUsers)(nil).UpdatePassword), ctx, userID, toUpdate)
+}

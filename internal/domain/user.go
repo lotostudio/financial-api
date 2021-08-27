@@ -24,6 +24,15 @@ type UserToCreate struct {
 	Password string `json:"password" example:"qweqweqwe"`
 } // @name UserToCreate
 
+type UserToUpdate struct {
+	// First name
+	FirstName *string `json:"firstName" example:"Sirius"`
+	// Last name
+	LastName *string `json:"lastName" example:"Sam"`
+	// Secret password
+	Password *string `json:"password" example:"qweqweqwe"`
+} // @name UserToUpdate
+
 type UserToLogin struct {
 	// Unique email
 	Email string `json:"email" example:"sirius@gmail.com"`
