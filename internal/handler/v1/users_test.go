@@ -82,6 +82,75 @@ func TestHandler_listUsers(t *testing.T) {
 	}
 }
 
+func TestHandler_getMe(t *testing.T) {
+	type mockBehaviour func(s *mockService.MockUsers)
+
+	userId := int64(1)
+
+	user := domain.User{
+		ID:        userId,
+		Email:     "",
+		FirstName: "Sirius",
+		LastName:  "Sam",
+		Password:  "qweqweqwe",
+	}
+
+	setResponseBody := func(user domain.User) string {
+		body, _ := json.Marshal(user)
+
+		return string(body)
+	}
+
+	tests := []struct {
+		name                 string
+		mockBehaviour        mockBehaviour
+		expectedCodeStatus   int
+		expectedResponseBody string
+	}{
+		{
+			name: "ok",
+			mockBehaviour: func(s *mockService.MockUsers) {
+				s.EXPECT().Get(context.Background(), userId).Return(user, nil)
+			},
+			expectedCodeStatus:   200,
+			expectedResponseBody: setResponseBody(user),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Init Dependencies
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			userService := mockService.NewMockUsers(c)
+			tt.mockBehaviour(userService)
+
+			services := &service.Services{Users: userService}
+			handler := &Handler{
+				services: services,
+			}
+
+			// Init Endpoint
+			r := gin.New()
+			r.GET("/users/me", func(c *gin.Context) {
+				c.Set(userCtx, strconv.FormatInt(userId, 10))
+			}, handler.getMe)
+
+			// Create Request
+			w := httptest.NewRecorder()
+			req := httptest.NewRequest("GET", "/users/me", bytes.NewBufferString(""))
+
+			// Make Request
+			r.ServeHTTP(w, req)
+
+			// Assert
+			assert.Equal(t, tt.expectedCodeStatus, w.Code)
+			assert.Equal(t, tt.expectedResponseBody, w.Body.String())
+		})
+	}
+}
+
 func TestHandler_partialUpdateMe(t *testing.T) {
 	type mockBehaviour func(s *mockService.MockUsers)
 
