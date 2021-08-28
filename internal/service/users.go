@@ -23,6 +23,10 @@ func (s *UsersService) List(ctx context.Context) ([]domain.User, error) {
 	return s.repo.List(ctx)
 }
 
+func (s *UsersService) Get(ctx context.Context, userID int64) (domain.User, error) {
+	return s.repo.Get(ctx, userID)
+}
+
 func (s *UsersService) UpdatePassword(ctx context.Context, userID int64, toUpdate domain.UserToUpdate) (domain.User, error) {
 	if toUpdate.Password != nil {
 		passwordHash, err := s.hasher.Hash(*toUpdate.Password)

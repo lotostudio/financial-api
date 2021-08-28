@@ -14,6 +14,7 @@ func (h *Handler) initUsersRoutes(api *gin.RouterGroup) {
 
 		me := users.Group("/me", h.userIdentity)
 		{
+			me.GET("", h.getMe)
 			me.PATCH("", h.partialUpdateMe)
 		}
 	}
@@ -37,6 +38,40 @@ func (h *Handler) listUsers(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, users)
+}
+
+// @Summary Retrieve me
+// @Tags users
+// @Description Retrieve authorized user
+// @ID getMe
+// @Accept json
+// @Produce json
+// @Success 200 {object} domain.User "Operation finished successfully"
+// @Failure 500 {object} response "Server error"
+// @Router /users/me [get]
+func (h *Handler) getMe(c *gin.Context) {
+	userIdString, ok := c.Get("userId")
+
+	if !ok {
+		newResponse(c, http.StatusInternalServerError, "user not found")
+		return
+	}
+
+	userId, err := strconv.ParseInt(userIdString.(string), 10, 64)
+
+	if err != nil {
+		newResponse(c, http.StatusInternalServerError, "user not found")
+		return
+	}
+
+	user, err := h.services.Users.Get(c.Request.Context(), userId)
+
+	if err != nil {
+		newResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
 }
 
 // @Summary Update me

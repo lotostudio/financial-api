@@ -12,6 +12,7 @@ import (
 
 type Users interface {
 	List(ctx context.Context) ([]domain.User, error)
+	Get(ctx context.Context, userID int64) (domain.User, error)
 	UpdatePassword(ctx context.Context, userID int64, toUpdate domain.UserToUpdate) (domain.User, error)
 }
 

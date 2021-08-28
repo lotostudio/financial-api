@@ -35,6 +35,21 @@ func (m *MockUsers) EXPECT() *MockUsersMockRecorder {
 	return m.recorder
 }
 
+// Get mocks base method.
+func (m *MockUsers) Get(ctx context.Context, userID int64) (domain.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Get", ctx, userID)
+	ret0, _ := ret[0].(domain.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get indicates an expected call of Get.
+func (mr *MockUsersMockRecorder) Get(ctx, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockUsers)(nil).Get), ctx, userID)
+}
+
 // List mocks base method.
 func (m *MockUsers) List(ctx context.Context) ([]domain.User, error) {
 	m.ctrl.T.Helper()
