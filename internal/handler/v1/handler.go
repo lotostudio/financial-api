@@ -23,5 +23,7 @@ func (h *Handler) Init(api *gin.RouterGroup) {
 	{
 		h.initUsersRoutes(v1)
 		h.initAuthRoutes(v1)
+		h.initCurrenciesRoutes(v1)
+		h.initAccountsRoutes(v1)
 	}
 }
