@@ -24,6 +24,7 @@ func (h *Handler) initAccountsRoutes(api *gin.RouterGroup) {
 // @Tags accounts
 // @Description List accounts of user
 // @ID listAccounts
+// @Security UsersAuth
 // @Accept json
 // @Produce json
 // @Success 200 {array} domain.Account "Operation finished successfully"
@@ -59,6 +60,7 @@ func (h *Handler) listAccounts(c *gin.Context) {
 // @Tags accounts
 // @Description Create new account
 // @ID createAccount
+// @Security UsersAuth
 // @Accept json
 // @Produce json
 // @Param currencyId query int true "Id of currency"
@@ -112,6 +114,11 @@ func (h *Handler) createAccount(c *gin.Context) {
 			return
 		}
 
+		if err == service.ErrInvalidLoanData || err == service.ErrInvalidDepositData {
+			newResponse(c, http.StatusBadRequest, err.Error())
+			return
+		}
+
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -123,6 +130,7 @@ func (h *Handler) createAccount(c *gin.Context) {
 // @Tags accounts
 // @Description Get account of user
 // @ID getAccount
+// @Security UsersAuth
 // @Accept json
 // @Produce json
 // @Param id path int64 true "Id of account"
@@ -185,6 +193,7 @@ func (h *Handler) getAccount(c *gin.Context) {
 // @Tags accounts
 // @Description Update account of user
 // @ID updateAccount
+// @Security UsersAuth
 // @Accept json
 // @Produce json
 // @Param id path int64 true "Id of account"
@@ -244,6 +253,11 @@ func (h *Handler) updateAccount(c *gin.Context) {
 			return
 		}
 
+		if err == service.ErrInvalidLoanData || err == service.ErrInvalidDepositData {
+			newResponse(c, http.StatusBadRequest, err.Error())
+			return
+		}
+
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -255,6 +269,7 @@ func (h *Handler) updateAccount(c *gin.Context) {
 // @Tags accounts
 // @Description Delete account of user
 // @ID deleteAccount
+// @Security UsersAuth
 // @Accept json
 // @Produce json
 // @Param id path int64 true "Id of account"

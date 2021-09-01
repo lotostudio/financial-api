@@ -1,6 +1,6 @@
 package domain
 
 type Currency struct {
-	ID   int64  `json:"id" db:"id"`
-	Code string `json:"code" db:"code"`
-}
+	ID   int    `json:"id" binding:"required" db:"id" example:"1"`
+	Code string `json:"code" binding:"required,max=10" maxLength:"10" db:"code" example:"KZT"`
+} // @name Currency

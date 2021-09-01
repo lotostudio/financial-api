@@ -29,6 +29,16 @@ func (s *AccountsService) Create(ctx context.Context, toCreate domain.AccountToC
 		return domain.Account{}, err
 	}
 
+	// Check for required fields of loan account
+	if toCreate.Type == "loan" && (toCreate.Term == nil || toCreate.Rate == nil) {
+		return domain.Account{}, ErrInvalidLoanData
+	}
+
+	// Check for required fields of deposit account
+	if toCreate.Type == "deposit" && (toCreate.Term == nil || toCreate.Rate == nil) {
+		return domain.Account{}, ErrInvalidDepositData
+	}
+
 	account, err := s.repo.Create(ctx, toCreate, userID, currencyID)
 
 	if err != nil {
