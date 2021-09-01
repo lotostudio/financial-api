@@ -21,10 +21,11 @@ func (r *AccountsRepo) List(ctx context.Context, userID int64) ([]domain.Account
 	accounts := make([]domain.Account, 0)
 
 	if err := r.db.SelectContext(ctx, &accounts, `
-	SELECT a.id, a.title, a.balance, c.code currency, a.type, a.created_at, l.term, l.rate, d.term, d.rate 
+	SELECT a.id, a.title, a.balance, c.code currency, a.type, a.created_at, 
+	       coalesce(l.term, d.term) AS term, coalesce(l.rate, d.rate) AS rate
 	FROM accounts a 
     LEFT JOIN loans l ON a.id = l.account_id 
-    LEFT JOIN deposits d ON d.id = l.account_id
+    LEFT JOIN deposits d ON a.id = d.account_id
 	JOIN currencies c ON a.currency_id = c.id
 	WHERE a.owner_id = $1`, userID); err != nil {
 		return nil, err
@@ -91,10 +92,11 @@ func (r *AccountsRepo) Get(ctx context.Context, id int64) (domain.Account, error
 	var accounts domain.Account
 
 	if err := r.db.GetContext(ctx, &accounts, `
-	SELECT a.id, a.title, a.balance, c.code currency, a.type, a.owner_id, a.created_at, l.term, l.rate, d.term, d.rate 
+	SELECT a.id, a.title, a.balance, c.code currency, a.type, a.owner_id, a.created_at, 
+	       coalesce(l.term, d.term) AS term, coalesce(l.rate, d.rate) AS rate
 	FROM accounts a 
     LEFT JOIN loans l ON a.id = l.account_id 
-    LEFT JOIN deposits d ON d.id = l.account_id
+    LEFT JOIN deposits d ON a.id = d.account_id
 	JOIN currencies c ON a.currency_id = c.id
 	WHERE a.id = $1`, id); err != nil {
 		if err == sql.ErrNoRows {
