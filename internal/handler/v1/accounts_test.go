@@ -101,6 +101,85 @@ func TestHandler_listAccounts(t *testing.T) {
 	}
 }
 
+func TestHandler_listGroupedAccounts(t *testing.T) {
+	type mockBehaviour func(s *mockService.MockAccounts)
+
+	grouped := domain.GroupedAccounts{
+		"card": []domain.Account{
+			{
+				ID:       1,
+				Title:    "acc1",
+				Balance:  12.1,
+				Currency: "KZT",
+				Type:     "card",
+			},
+		},
+	}
+
+	setResponseBody := func(accounts domain.GroupedAccounts) string {
+		body, _ := json.Marshal(accounts)
+
+		return string(body)
+	}
+
+	tests := []struct {
+		name                 string
+		mockBehaviour        mockBehaviour
+		expectedCodeStatus   int
+		expectedResponseBody string
+	}{
+		{
+			name: "ok",
+			mockBehaviour: func(s *mockService.MockAccounts) {
+				s.EXPECT().ListGrouped(context.Background(), userID).Return(grouped, nil)
+			},
+			expectedCodeStatus:   200,
+			expectedResponseBody: setResponseBody(grouped),
+		},
+		{
+			name: "error",
+			mockBehaviour: func(s *mockService.MockAccounts) {
+				s.EXPECT().ListGrouped(context.Background(), userID).Return(grouped, errors.New("general error"))
+			},
+			expectedCodeStatus:   500,
+			expectedResponseBody: `{"message":"general error"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Init Dependencies
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			aService := mockService.NewMockAccounts(c)
+			tt.mockBehaviour(aService)
+
+			services := &service.Services{Accounts: aService}
+			handler := &Handler{
+				services: services,
+			}
+
+			// Init Endpoint
+			r := gin.New()
+			r.GET("/accounts/grouped", func(c *gin.Context) {
+				c.Set(userCtx, strconv.FormatInt(userID, 10))
+			}, handler.listGropedAccounts)
+
+			// Create Request
+			w := httptest.NewRecorder()
+			req := httptest.NewRequest("GET", "/accounts/grouped", bytes.NewBufferString(""))
+
+			// Make Request
+			r.ServeHTTP(w, req)
+
+			// Assert
+			assert.Equal(t, tt.expectedCodeStatus, w.Code)
+			assert.Equal(t, tt.expectedResponseBody, w.Body.String())
+		})
+	}
+}
+
 func TestHandler_createAccount(t *testing.T) {
 	type mockBehaviour func(s *mockService.MockAccounts)
 

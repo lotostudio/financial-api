@@ -22,6 +22,28 @@ func (s *AccountsService) List(ctx context.Context, userID int64) ([]domain.Acco
 	return s.repo.List(ctx, userID)
 }
 
+func (s *AccountsService) ListGrouped(ctx context.Context, userID int64) (domain.GroupedAccounts, error) {
+	accounts, err := s.repo.List(ctx, userID)
+
+	if err != nil {
+		return domain.GroupedAccounts{}, err
+	}
+
+	grouped := make(domain.GroupedAccounts)
+
+	// Iterate through accounts and group them by types
+	for _, a := range accounts {
+		if val, ok := grouped[a.Type]; ok {
+			grouped[a.Type] = append(val, a)
+			continue
+		}
+
+		grouped[a.Type] = []domain.Account{a}
+	}
+
+	return grouped, nil
+}
+
 func (s *AccountsService) Create(ctx context.Context, toCreate domain.AccountToCreate, userID int64, currencyID int) (domain.Account, error) {
 	currency, err := s.currenciesRepo.Get(ctx, currencyID)
 

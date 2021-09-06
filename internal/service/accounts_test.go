@@ -43,6 +43,46 @@ func TestAccountsService_List(t *testing.T) {
 	require.IsType(t, []domain.Account{}, accounts)
 }
 
+func TestAccountsService_ListGrouped(t *testing.T) {
+	s, aRepo, _ := mockAccountsService(t)
+
+	ctx := context.Background()
+
+	aRepo.EXPECT().List(ctx, userId).Return([]domain.Account{
+		{
+			ID:       1,
+			Title:    "acc1",
+			Balance:  12.1,
+			Currency: "KZT",
+			Type:     "card",
+		},
+		{
+			ID:       2,
+			Title:    "acc2",
+			Balance:  12.1,
+			Currency: "KZT",
+			Type:     "card",
+		},
+	}, nil)
+
+	accounts, err := s.ListGrouped(ctx, userId)
+
+	require.NoError(t, err)
+	require.IsType(t, domain.GroupedAccounts{}, accounts)
+}
+
+func TestAccountsService_ListGroupedError(t *testing.T) {
+	s, aRepo, _ := mockAccountsService(t)
+
+	ctx := context.Background()
+
+	aRepo.EXPECT().List(ctx, userId).Return(nil, errors.New("general error"))
+
+	_, err := s.ListGrouped(ctx, userId)
+
+	require.Error(t, err)
+}
+
 func TestAccountsService_Create(t *testing.T) {
 	s, aRepo, cRepo := mockAccountsService(t)
 
