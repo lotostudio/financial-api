@@ -52,17 +52,17 @@ func (s *AccountsService) Create(ctx context.Context, toCreate domain.AccountToC
 	}
 
 	// Check for required fields of loan account
-	if toCreate.Type == "loan" && (toCreate.Term == nil || toCreate.Rate == nil) {
+	if toCreate.Type == domain.Loan && (toCreate.Term == nil || toCreate.Rate == nil) {
 		return domain.Account{}, ErrInvalidLoanData
 	}
 
 	// Check for required fields of deposit account
-	if toCreate.Type == "deposit" && (toCreate.Term == nil || toCreate.Rate == nil) {
+	if toCreate.Type == domain.Deposit && (toCreate.Term == nil || toCreate.Rate == nil) {
 		return domain.Account{}, ErrInvalidDepositData
 	}
 
 	// Check for required fields of card account
-	if toCreate.Type == "card" && toCreate.Number == nil {
+	if toCreate.Type == domain.Card && toCreate.Number == nil {
 		return domain.Account{}, ErrInvalidCardData
 	}
 
@@ -99,17 +99,17 @@ func (s *AccountsService) Update(ctx context.Context, toUpdate domain.AccountToU
 	}
 
 	// Check for required fields of loan account
-	if instance.Type == "loan" && (toUpdate.Term == nil || toUpdate.Rate == nil) {
+	if instance.Type == domain.Loan && (toUpdate.Term == nil || toUpdate.Rate == nil) {
 		return instance, ErrInvalidLoanData
 	}
 
 	// Check for required fields of deposit account
-	if instance.Type == "deposit" && (toUpdate.Term == nil || toUpdate.Rate == nil) {
+	if instance.Type == domain.Deposit && (toUpdate.Term == nil || toUpdate.Rate == nil) {
 		return instance, ErrInvalidDepositData
 	}
 
 	// Check for required fields of card account
-	if instance.Type == "card" && toUpdate.Number == nil {
+	if instance.Type == domain.Card && toUpdate.Number == nil {
 		return domain.Account{}, ErrInvalidCardData
 	}
 

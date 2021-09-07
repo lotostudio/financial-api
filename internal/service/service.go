@@ -34,18 +34,24 @@ type Accounts interface {
 	Delete(ctx context.Context, id int64, userID int64) error
 }
 
+type AccountTypes interface {
+	List(ctx context.Context) ([]domain.AccountType, error)
+}
+
 type Services struct {
 	Users
 	Auth
 	Currencies
 	Accounts
+	AccountTypes
 }
 
 func NewServices(repos *repo.Repos, hasher hash.PasswordHasher, tokenManager auth.TokenManager) *Services {
 	return &Services{
-		Users:      newUsersService(repos.Users, hasher),
-		Auth:       newAuthService(repos.Users, hasher, tokenManager),
-		Currencies: newCurrenciesService(repos.Currencies),
-		Accounts:   newAccountsService(repos.Accounts, repos.Currencies),
+		Users:        newUsersService(repos.Users, hasher),
+		Auth:         newAuthService(repos.Users, hasher, tokenManager),
+		Currencies:   newCurrenciesService(repos.Currencies),
+		Accounts:     newAccountsService(repos.Accounts, repos.Currencies),
+		AccountTypes: newAccountTypesService(repos.AccountTypes),
 	}
 }

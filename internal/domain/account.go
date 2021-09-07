@@ -2,6 +2,14 @@ package domain
 
 import "time"
 
+// Account types
+const (
+	Cash    = AccountType("cash")
+	Card    = AccountType("card")
+	Loan    = AccountType("loan")
+	Deposit = AccountType("deposit")
+)
+
 type Account struct {
 	// Unique id
 	ID int64 `json:"id" binding:"required" db:"id" example:"1"`
@@ -12,8 +20,8 @@ type Account struct {
 	// Currency
 	Currency string `json:"currency" binding:"required" db:"currency" example:"KZT"`
 	// Type (different types have distinct data)
-	Type    string `json:"type" binding:"required,oneof=card cash loan deposit" db:"type" enums:"card,cash,loan,deposit" example:"deposit"`
-	OwnerId int64  `json:"-" db:"owner_id" swaggerignore:"true"`
+	Type    AccountType `json:"type" binding:"required,oneof=card cash loan deposit" db:"type" enums:"card,cash,loan,deposit" example:"deposit"`
+	OwnerId int64       `json:"-" db:"owner_id" swaggerignore:"true"`
 	// Time of creation
 	CreatedAt time.Time `json:"createdAt" binding:"required,datetime" db:"created_at" format:"yyyy-MM-ddThh:mm:ss.ZZZ" example:"2021-09-01T18:03:24.499198Z"`
 	// Applicable for cards
@@ -35,7 +43,7 @@ type AccountToCreate struct {
 	// Current amount of money
 	Balance float64 `json:"balance" binding:"required,gte=0" example:"123002.12"`
 	// Type (different types have distinct data)
-	Type string `json:"type" binding:"required,oneof=card cash loan deposit" enums:"card,cash,loan,deposit" example:"deposit"`
+	Type AccountType `json:"type" binding:"required,oneof=card cash loan deposit" enums:"card,cash,loan,deposit" example:"deposit"`
 	// Applicable for cards
 	// * For cards - last 4 digit of card number
 	Number *string `json:"number" binding:"omitempty,numeric,len=4" example:"0327"`
@@ -67,4 +75,6 @@ type AccountToUpdate struct {
 	Rate *float32 `json:"rate" binding:"omitempty,gt=0" example:"10.8"`
 } // @name AccountToUpdate
 
-type GroupedAccounts map[string][]Account // @name GroupedAccounts
+type AccountType string // @name AccountType
+
+type GroupedAccounts map[AccountType][]Account // @name GroupedAccounts

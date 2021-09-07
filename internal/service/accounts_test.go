@@ -47,6 +47,7 @@ func TestAccountsService_ListGrouped(t *testing.T) {
 	s, aRepo, _ := mockAccountsService(t)
 
 	ctx := context.Background()
+	number := "0000"
 
 	aRepo.EXPECT().List(ctx, userId).Return([]domain.Account{
 		{
@@ -54,14 +55,16 @@ func TestAccountsService_ListGrouped(t *testing.T) {
 			Title:    "acc1",
 			Balance:  12.1,
 			Currency: "KZT",
-			Type:     "card",
+			Type:     domain.Card,
+			Number:   &number,
 		},
 		{
 			ID:       2,
 			Title:    "acc2",
 			Balance:  12.1,
 			Currency: "KZT",
-			Type:     "card",
+			Type:     domain.Card,
+			Number:   &number,
 		},
 	}, nil)
 
@@ -121,7 +124,9 @@ func TestAccountsService_CreateInvalidLoanData(t *testing.T) {
 	toCreate := domain.AccountToCreate{
 		Title:   "",
 		Balance: 0,
-		Type:    "loan",
+		Type:    domain.Loan,
+		Term:    nil,
+		Rate:    nil,
 	}
 
 	cRepo.EXPECT().Get(ctx, 1).Return(domain.Currency{ID: 1, Code: "KZT"}, nil)
@@ -138,7 +143,9 @@ func TestAccountsService_CreateInvalidDepositData(t *testing.T) {
 	toCreate := domain.AccountToCreate{
 		Title:   "",
 		Balance: 0,
-		Type:    "deposit",
+		Type:    domain.Deposit,
+		Term:    nil,
+		Rate:    nil,
 	}
 
 	cRepo.EXPECT().Get(ctx, 1).Return(domain.Currency{ID: 1, Code: "KZT"}, nil)
@@ -155,7 +162,7 @@ func TestAccountsService_CreateInvalidCardData(t *testing.T) {
 	toCreate := domain.AccountToCreate{
 		Title:   "",
 		Balance: 0,
-		Type:    "card",
+		Type:    domain.Card,
 	}
 
 	cRepo.EXPECT().Get(ctx, 1).Return(domain.Currency{ID: 1, Code: "KZT"}, nil)
@@ -172,7 +179,7 @@ func TestAccountsService_CreateGeneralError(t *testing.T) {
 	toCreate := domain.AccountToCreate{
 		Title:   "qwe",
 		Balance: 123,
-		Type:    "cash",
+		Type:    domain.Cash,
 	}
 
 	cRepo.EXPECT().Get(ctx, 1).Return(domain.Currency{ID: 1, Code: "KZT"}, nil)
@@ -236,9 +243,9 @@ func TestAccountsService_Update(t *testing.T) {
 
 	aRepo.EXPECT().Get(ctx, accountId).Return(domain.Account{
 		OwnerId: userId,
-		Type:    "cash",
+		Type:    domain.Cash,
 	}, nil)
-	aRepo.EXPECT().Update(ctx, toUpdate, accountId, "cash").Return(domain.Account{}, nil)
+	aRepo.EXPECT().Update(ctx, toUpdate, accountId, domain.Cash).Return(domain.Account{}, nil)
 
 	account, err := s.Update(ctx, toUpdate, accountId, userId)
 
@@ -265,7 +272,7 @@ func TestAccountsService_UpdateInvalidLoanData(t *testing.T) {
 
 	aRepo.EXPECT().Get(ctx, accountId).Return(domain.Account{
 		OwnerId: userId,
-		Type:    "loan",
+		Type:    domain.Loan,
 	}, nil)
 
 	_, err := s.Update(ctx, domain.AccountToUpdate{}, accountId, userId)
@@ -280,7 +287,7 @@ func TestAccountsService_UpdateInvalidDepositData(t *testing.T) {
 
 	aRepo.EXPECT().Get(ctx, accountId).Return(domain.Account{
 		OwnerId: userId,
-		Type:    "deposit",
+		Type:    domain.Deposit,
 	}, nil)
 
 	_, err := s.Update(ctx, domain.AccountToUpdate{}, accountId, userId)
@@ -295,7 +302,7 @@ func TestAccountsService_UpdateInvalidCardData(t *testing.T) {
 
 	aRepo.EXPECT().Get(ctx, accountId).Return(domain.Account{
 		OwnerId: userId,
-		Type:    "card",
+		Type:    domain.Card,
 	}, nil)
 
 	_, err := s.Update(ctx, domain.AccountToUpdate{}, accountId, userId)
@@ -315,9 +322,9 @@ func TestAccountsService_UpdateGeneralError(t *testing.T) {
 
 	aRepo.EXPECT().Get(ctx, accountId).Return(domain.Account{
 		OwnerId: userId,
-		Type:    "cash",
+		Type:    domain.Cash,
 	}, nil)
-	aRepo.EXPECT().Update(ctx, toUpdate, accountId, "cash").Return(domain.Account{}, errors.New("general error"))
+	aRepo.EXPECT().Update(ctx, toUpdate, accountId, domain.Cash).Return(domain.Account{}, errors.New("general error"))
 
 	_, err := s.Update(ctx, toUpdate, accountId, userId)
 

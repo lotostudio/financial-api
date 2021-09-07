@@ -33,7 +33,7 @@ func TestHandler_listAccounts(t *testing.T) {
 			Title:    "acc1",
 			Balance:  12.1,
 			Currency: "KZT",
-			Type:     "card",
+			Type:     domain.Card,
 		},
 	}
 
@@ -105,13 +105,13 @@ func TestHandler_listGroupedAccounts(t *testing.T) {
 	type mockBehaviour func(s *mockService.MockAccounts)
 
 	grouped := domain.GroupedAccounts{
-		"card": []domain.Account{
+		domain.Card: []domain.Account{
 			{
 				ID:       1,
 				Title:    "acc1",
 				Balance:  12.1,
 				Currency: "KZT",
-				Type:     "card",
+				Type:     domain.Card,
 			},
 		},
 	}
@@ -188,7 +188,7 @@ func TestHandler_createAccount(t *testing.T) {
 	toCreate := domain.AccountToCreate{
 		Title:   "Acc1",
 		Balance: 12,
-		Type:    "card",
+		Type:    domain.Card,
 	}
 
 	account := domain.Account{
@@ -196,7 +196,7 @@ func TestHandler_createAccount(t *testing.T) {
 		Title:    "Acc1",
 		Balance:  12,
 		Currency: "KZT",
-		Type:     "card",
+		Type:     domain.Card,
 		OwnerId:  userID,
 	}
 
@@ -266,7 +266,7 @@ func TestHandler_createAccount(t *testing.T) {
 			requestToCreate: domain.AccountToCreate{
 				Title:   "Acc1",
 				Balance: 12,
-				Type:    "loan",
+				Type:    domain.Loan,
 				Term:    nil,
 				Rate:    nil,
 			},
@@ -274,7 +274,7 @@ func TestHandler_createAccount(t *testing.T) {
 				s.EXPECT().Create(context.Background(), domain.AccountToCreate{
 					Title:   "Acc1",
 					Balance: 12,
-					Type:    "loan",
+					Type:    domain.Loan,
 					Term:    nil,
 					Rate:    nil,
 				}, userID, currencyID).Return(account, service.ErrInvalidLoanData)
@@ -289,7 +289,7 @@ func TestHandler_createAccount(t *testing.T) {
 			requestToCreate: domain.AccountToCreate{
 				Title:   "Acc1",
 				Balance: 12,
-				Type:    "deposit",
+				Type:    domain.Deposit,
 				Term:    nil,
 				Rate:    nil,
 			},
@@ -297,7 +297,7 @@ func TestHandler_createAccount(t *testing.T) {
 				s.EXPECT().Create(context.Background(), domain.AccountToCreate{
 					Title:   "Acc1",
 					Balance: 12,
-					Type:    "deposit",
+					Type:    domain.Deposit,
 					Term:    nil,
 					Rate:    nil,
 				}, userID, currencyID).Return(account, service.ErrInvalidDepositData)
@@ -360,7 +360,7 @@ func TestHandler_getAccount(t *testing.T) {
 		Title:    "Acc1",
 		Balance:  12.1,
 		Currency: "KZT",
-		Type:     "card",
+		Type:     domain.Card,
 	}
 
 	setResponseBody := func(account domain.Account) string {
@@ -457,7 +457,7 @@ func TestHandler_updateAccount(t *testing.T) {
 		Title:    "Acc1",
 		Balance:  12,
 		Currency: "KZT",
-		Type:     "card",
+		Type:     domain.Card,
 		OwnerId:  userID,
 	}
 

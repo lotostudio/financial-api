@@ -282,3 +282,41 @@ func (mr *MockAccountsMockRecorder) Update(ctx, toUpdate, id, userID interface{}
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockAccounts)(nil).Update), ctx, toUpdate, id, userID)
 }
+
+// MockAccountTypes is a mock of AccountTypes interface.
+type MockAccountTypes struct {
+	ctrl     *gomock.Controller
+	recorder *MockAccountTypesMockRecorder
+}
+
+// MockAccountTypesMockRecorder is the mock recorder for MockAccountTypes.
+type MockAccountTypesMockRecorder struct {
+	mock *MockAccountTypes
+}
+
+// NewMockAccountTypes creates a new mock instance.
+func NewMockAccountTypes(ctrl *gomock.Controller) *MockAccountTypes {
+	mock := &MockAccountTypes{ctrl: ctrl}
+	mock.recorder = &MockAccountTypesMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockAccountTypes) EXPECT() *MockAccountTypesMockRecorder {
+	return m.recorder
+}
+
+// List mocks base method.
+func (m *MockAccountTypes) List(ctx context.Context) ([]domain.AccountType, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "List", ctx)
+	ret0, _ := ret[0].([]domain.AccountType)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// List indicates an expected call of List.
+func (mr *MockAccountTypesMockRecorder) List(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockAccountTypes)(nil).List), ctx)
+}
