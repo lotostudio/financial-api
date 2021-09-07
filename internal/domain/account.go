@@ -16,6 +16,9 @@ type Account struct {
 	OwnerId int64  `json:"-" db:"owner_id" swaggerignore:"true"`
 	// Time of creation
 	CreatedAt time.Time `json:"createdAt" binding:"required,datetime" db:"created_at" format:"yyyy-MM-ddThh:mm:ss.ZZZ" example:"2021-09-01T18:03:24.499198Z"`
+	// Applicable for cards
+	// * For cards - last 4 digit of card number
+	Number *string `json:"number,omitempty" binding:"omitempty,numeric,len=4" db:"number" example:"0327"`
 	// Applicable for loans and deposits
 	// * For loans - loan term
 	// * For deposits - term of deposit
@@ -33,6 +36,9 @@ type AccountToCreate struct {
 	Balance float64 `json:"balance" binding:"required,gte=0" example:"123002.12"`
 	// Type (different types have distinct data)
 	Type string `json:"type" binding:"required,oneof=card cash loan deposit" enums:"card,cash,loan,deposit" example:"deposit"`
+	// Applicable for cards
+	// * For cards - last 4 digit of card number
+	Number *string `json:"number" binding:"omitempty,numeric,len=4" example:"0327"`
 	// In months. Applicable for loans and deposits
 	// * For loans - loan term
 	// * For deposits - term of deposit
@@ -48,6 +54,9 @@ type AccountToUpdate struct {
 	Title *string `json:"title" example:"Secondary savings"`
 	// Current amount of money
 	Balance *float64 `json:"balance" binding:"omitempty,gte=0" example:"123002.12"`
+	// Applicable for cards
+	// * For cards - last 4 digit of card number
+	Number *string `json:"number" binding:"omitempty,numeric,len=4" example:"0327"`
 	// Applicable for loans and deposits
 	// * For loans - loan term
 	// * For deposits - term of deposit
