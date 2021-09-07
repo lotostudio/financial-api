@@ -27,6 +27,7 @@ type Currencies interface {
 
 type Accounts interface {
 	List(ctx context.Context, userID int64) ([]domain.Account, error)
+	ListGrouped(ctx context.Context, userID int64) (domain.GroupedAccounts, error)
 	Create(ctx context.Context, toCreate domain.AccountToCreate, userID int64, currencyID int) (domain.Account, error)
 	Get(ctx context.Context, id int64, userID int64) (domain.Account, error)
 	Update(ctx context.Context, toUpdate domain.AccountToUpdate, id int64, userID int64) (domain.Account, error)

@@ -22,6 +22,28 @@ func (s *AccountsService) List(ctx context.Context, userID int64) ([]domain.Acco
 	return s.repo.List(ctx, userID)
 }
 
+func (s *AccountsService) ListGrouped(ctx context.Context, userID int64) (domain.GroupedAccounts, error) {
+	accounts, err := s.repo.List(ctx, userID)
+
+	if err != nil {
+		return domain.GroupedAccounts{}, err
+	}
+
+	grouped := make(domain.GroupedAccounts)
+
+	// Iterate through accounts and group them by types
+	for _, a := range accounts {
+		if val, ok := grouped[a.Type]; ok {
+			grouped[a.Type] = append(val, a)
+			continue
+		}
+
+		grouped[a.Type] = []domain.Account{a}
+	}
+
+	return grouped, nil
+}
+
 func (s *AccountsService) Create(ctx context.Context, toCreate domain.AccountToCreate, userID int64, currencyID int) (domain.Account, error) {
 	currency, err := s.currenciesRepo.Get(ctx, currencyID)
 
@@ -37,6 +59,11 @@ func (s *AccountsService) Create(ctx context.Context, toCreate domain.AccountToC
 	// Check for required fields of deposit account
 	if toCreate.Type == domain.Deposit && (toCreate.Term == nil || toCreate.Rate == nil) {
 		return domain.Account{}, ErrInvalidDepositData
+	}
+
+	// Check for required fields of card account
+	if toCreate.Type == domain.Card && toCreate.Number == nil {
+		return domain.Account{}, ErrInvalidCardData
 	}
 
 	account, err := s.repo.Create(ctx, toCreate, userID, currencyID)
@@ -79,6 +106,11 @@ func (s *AccountsService) Update(ctx context.Context, toUpdate domain.AccountToU
 	// Check for required fields of deposit account
 	if instance.Type == domain.Deposit && (toUpdate.Term == nil || toUpdate.Rate == nil) {
 		return instance, ErrInvalidDepositData
+	}
+
+	// Check for required fields of card account
+	if instance.Type == domain.Card && toUpdate.Number == nil {
+		return domain.Account{}, ErrInvalidCardData
 	}
 
 	account, err := s.repo.Update(ctx, toUpdate, id, instance.Type)

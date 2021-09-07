@@ -8,10 +8,10 @@ import (
 )
 
 func (h *Handler) initAuthRoutes(api *gin.RouterGroup) {
-	users := api.Group("/auth")
+	auth := api.Group("/auth")
 	{
-		users.POST("/register", h.register)
-		users.POST("/login", h.login)
+		auth.POST("/register", h.register)
+		auth.POST("/login", h.login)
 	}
 }
 

@@ -43,6 +43,49 @@ func TestAccountsService_List(t *testing.T) {
 	require.IsType(t, []domain.Account{}, accounts)
 }
 
+func TestAccountsService_ListGrouped(t *testing.T) {
+	s, aRepo, _ := mockAccountsService(t)
+
+	ctx := context.Background()
+	number := "0000"
+
+	aRepo.EXPECT().List(ctx, userId).Return([]domain.Account{
+		{
+			ID:       1,
+			Title:    "acc1",
+			Balance:  12.1,
+			Currency: "KZT",
+			Type:     domain.Card,
+			Number:   &number,
+		},
+		{
+			ID:       2,
+			Title:    "acc2",
+			Balance:  12.1,
+			Currency: "KZT",
+			Type:     domain.Card,
+			Number:   &number,
+		},
+	}, nil)
+
+	accounts, err := s.ListGrouped(ctx, userId)
+
+	require.NoError(t, err)
+	require.IsType(t, domain.GroupedAccounts{}, accounts)
+}
+
+func TestAccountsService_ListGroupedError(t *testing.T) {
+	s, aRepo, _ := mockAccountsService(t)
+
+	ctx := context.Background()
+
+	aRepo.EXPECT().List(ctx, userId).Return(nil, errors.New("general error"))
+
+	_, err := s.ListGrouped(ctx, userId)
+
+	require.Error(t, err)
+}
+
 func TestAccountsService_Create(t *testing.T) {
 	s, aRepo, cRepo := mockAccountsService(t)
 
@@ -51,8 +94,6 @@ func TestAccountsService_Create(t *testing.T) {
 		Title:   "",
 		Balance: 0,
 		Type:    "",
-		Term:    nil,
-		Rate:    nil,
 	}
 
 	cRepo.EXPECT().Get(ctx, 1).Return(domain.Currency{ID: 1, Code: "KZT"}, nil)
@@ -114,6 +155,23 @@ func TestAccountsService_CreateInvalidDepositData(t *testing.T) {
 	require.ErrorIs(t, err, ErrInvalidDepositData)
 }
 
+func TestAccountsService_CreateInvalidCardData(t *testing.T) {
+	s, _, cRepo := mockAccountsService(t)
+
+	ctx := context.Background()
+	toCreate := domain.AccountToCreate{
+		Title:   "",
+		Balance: 0,
+		Type:    domain.Card,
+	}
+
+	cRepo.EXPECT().Get(ctx, 1).Return(domain.Currency{ID: 1, Code: "KZT"}, nil)
+
+	_, err := s.Create(ctx, toCreate, userId, 1)
+
+	require.ErrorIs(t, err, ErrInvalidCardData)
+}
+
 func TestAccountsService_CreateGeneralError(t *testing.T) {
 	s, aRepo, cRepo := mockAccountsService(t)
 
@@ -121,7 +179,7 @@ func TestAccountsService_CreateGeneralError(t *testing.T) {
 	toCreate := domain.AccountToCreate{
 		Title:   "qwe",
 		Balance: 123,
-		Type:    domain.Card,
+		Type:    domain.Cash,
 	}
 
 	cRepo.EXPECT().Get(ctx, 1).Return(domain.Currency{ID: 1, Code: "KZT"}, nil)
@@ -181,15 +239,13 @@ func TestAccountsService_Update(t *testing.T) {
 	toUpdate := domain.AccountToUpdate{
 		Title:   &title,
 		Balance: &balance,
-		Term:    nil,
-		Rate:    nil,
 	}
 
 	aRepo.EXPECT().Get(ctx, accountId).Return(domain.Account{
 		OwnerId: userId,
-		Type:    domain.Card,
+		Type:    domain.Cash,
 	}, nil)
-	aRepo.EXPECT().Update(ctx, toUpdate, accountId, domain.Card).Return(domain.Account{}, nil)
+	aRepo.EXPECT().Update(ctx, toUpdate, accountId, domain.Cash).Return(domain.Account{}, nil)
 
 	account, err := s.Update(ctx, toUpdate, accountId, userId)
 
@@ -239,6 +295,21 @@ func TestAccountsService_UpdateInvalidDepositData(t *testing.T) {
 	require.ErrorIs(t, err, ErrInvalidDepositData)
 }
 
+func TestAccountsService_UpdateInvalidCardData(t *testing.T) {
+	s, aRepo, _ := mockAccountsService(t)
+
+	ctx := context.Background()
+
+	aRepo.EXPECT().Get(ctx, accountId).Return(domain.Account{
+		OwnerId: userId,
+		Type:    domain.Card,
+	}, nil)
+
+	_, err := s.Update(ctx, domain.AccountToUpdate{}, accountId, userId)
+
+	require.ErrorIs(t, err, ErrInvalidCardData)
+}
+
 func TestAccountsService_UpdateGeneralError(t *testing.T) {
 	s, aRepo, _ := mockAccountsService(t)
 
@@ -247,15 +318,13 @@ func TestAccountsService_UpdateGeneralError(t *testing.T) {
 	toUpdate := domain.AccountToUpdate{
 		Title:   &title,
 		Balance: &balance,
-		Term:    nil,
-		Rate:    nil,
 	}
 
 	aRepo.EXPECT().Get(ctx, accountId).Return(domain.Account{
 		OwnerId: userId,
-		Type:    domain.Card,
+		Type:    domain.Cash,
 	}, nil)
-	aRepo.EXPECT().Update(ctx, toUpdate, accountId, domain.Card).Return(domain.Account{}, errors.New("general error"))
+	aRepo.EXPECT().Update(ctx, toUpdate, accountId, domain.Cash).Return(domain.Account{}, errors.New("general error"))
 
 	_, err := s.Update(ctx, toUpdate, accountId, userId)
 

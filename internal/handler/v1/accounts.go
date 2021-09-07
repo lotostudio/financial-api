@@ -13,6 +13,7 @@ func (h *Handler) initAccountsRoutes(api *gin.RouterGroup) {
 	accounts := api.Group("/accounts", h.userIdentity)
 	{
 		accounts.GET("", h.listAccounts)
+		accounts.GET("/grouped", h.listGropedAccounts)
 		accounts.POST("", h.createAccount)
 		accounts.GET("/:id", h.getAccount)
 		accounts.PUT("/:id", h.updateAccount)
@@ -47,6 +48,42 @@ func (h *Handler) listAccounts(c *gin.Context) {
 	}
 
 	accounts, err := h.services.Accounts.List(c.Request.Context(), userId)
+
+	if err != nil {
+		newResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, accounts)
+}
+
+// @Summary List grouped accounts
+// @Tags accounts
+// @Description List grouped accounts of user by types
+// @ID listGroupedAccounts
+// @Security UsersAuth
+// @Accept json
+// @Produce json
+// @Success 200 {object} domain.GroupedAccounts "Operation finished successfully"
+// @Failure 401 {object} response "Invalid authorization"
+// @Failure 500 {object} response "Server error"
+// @Router /accounts/grouped [get]
+func (h *Handler) listGropedAccounts(c *gin.Context) {
+	userIdString, ok := c.Get("userId")
+
+	if !ok {
+		newResponse(c, http.StatusInternalServerError, "user not found")
+		return
+	}
+
+	userId, err := strconv.ParseInt(userIdString.(string), 10, 64)
+
+	if err != nil {
+		newResponse(c, http.StatusInternalServerError, "user not found")
+		return
+	}
+
+	accounts, err := h.services.Accounts.ListGrouped(c.Request.Context(), userId)
 
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())

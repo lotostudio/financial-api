@@ -253,6 +253,21 @@ func (mr *MockAccountsMockRecorder) List(ctx, userID interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockAccounts)(nil).List), ctx, userID)
 }
 
+// ListGrouped mocks base method.
+func (m *MockAccounts) ListGrouped(ctx context.Context, userID int64) (domain.GroupedAccounts, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListGrouped", ctx, userID)
+	ret0, _ := ret[0].(domain.GroupedAccounts)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListGrouped indicates an expected call of ListGrouped.
+func (mr *MockAccountsMockRecorder) ListGrouped(ctx, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListGrouped", reflect.TypeOf((*MockAccounts)(nil).ListGrouped), ctx, userID)
+}
+
 // Update mocks base method.
 func (m *MockAccounts) Update(ctx context.Context, toUpdate domain.AccountToUpdate, id, userID int64) (domain.Account, error) {
 	m.ctrl.T.Helper()
