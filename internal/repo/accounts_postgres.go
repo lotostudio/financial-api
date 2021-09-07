@@ -104,9 +104,9 @@ func (r *AccountsRepo) Create(ctx context.Context, toCreate domain.AccountToCrea
 }
 
 func (r *AccountsRepo) Get(ctx context.Context, id int64) (domain.Account, error) {
-	var accounts domain.Account
+	var account domain.Account
 
-	if err := r.db.GetContext(ctx, &accounts, `
+	if err := r.db.GetContext(ctx, &account, `
 	SELECT a.id, a.title, a.balance, cur.code currency, a.type, a.owner_id, a.created_at, 
 	       coalesce(l.term, d.term) AS term, coalesce(l.rate, d.rate) AS rate, c.number
 	FROM accounts a 
@@ -119,10 +119,10 @@ func (r *AccountsRepo) Get(ctx context.Context, id int64) (domain.Account, error
 			return domain.Account{}, ErrAccountNotFound
 		}
 
-		return accounts, err
+		return account, err
 	}
 
-	return accounts, nil
+	return account, nil
 }
 
 func (r *AccountsRepo) Update(ctx context.Context, toUpdate domain.AccountToUpdate, id int64, _type string) (domain.Account, error) {
