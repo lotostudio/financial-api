@@ -57,3 +57,5 @@ type AccountToUpdate struct {
 	// * For deposits - deposit percentage
 	Rate *float32 `json:"rate" binding:"omitempty,gt=0" example:"10.8"`
 } // @name AccountToUpdate
+
+type AccountType string

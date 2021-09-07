@@ -29,16 +29,22 @@ type Accounts interface {
 	Delete(ctx context.Context, id int64) error
 }
 
+type AccountTypes interface {
+	List(ctx context.Context) ([]domain.AccountType, error)
+}
+
 type Repos struct {
 	Users
 	Currencies
 	Accounts
+	AccountTypes
 }
 
 func NewRepos(db *sqlx.DB) *Repos {
 	return &Repos{
-		Users:      newUsersRepo(db),
-		Currencies: newCurrenciesRepo(db),
-		Accounts:   newAccountsRepo(db),
+		Users:        newUsersRepo(db),
+		Currencies:   newCurrenciesRepo(db),
+		Accounts:     newAccountsRepo(db),
+		AccountTypes: newAccountTypesRepo(db),
 	}
 }
