@@ -44,6 +44,7 @@ func (h *Handler) listUsers(c *gin.Context) {
 // @Tags users
 // @Description Retrieve authorized user
 // @ID getMe
+// @Security UsersAuth
 // @Accept json
 // @Produce json
 // @Success 200 {object} domain.User "Operation finished successfully"
@@ -78,6 +79,7 @@ func (h *Handler) getMe(c *gin.Context) {
 // @Tags users
 // @Description Update self user
 // @ID partialUpdateMe
+// @Security UsersAuth
 // @Accept json
 // @Produce json
 // @Param input body domain.UserToUpdate true "Data to update"
