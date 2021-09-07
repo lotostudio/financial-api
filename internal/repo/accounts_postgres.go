@@ -21,12 +21,13 @@ func (r *AccountsRepo) List(ctx context.Context, userID int64) ([]domain.Account
 	accounts := make([]domain.Account, 0)
 
 	if err := r.db.SelectContext(ctx, &accounts, `
-	SELECT a.id, a.title, a.balance, c.code currency, a.type, a.created_at, 
-	       coalesce(l.term, d.term) AS term, coalesce(l.rate, d.rate) AS rate
+	SELECT a.id, a.title, a.balance, cur.code currency, a.type, a.created_at, 
+	       coalesce(l.term, d.term) AS term, coalesce(l.rate, d.rate) AS rate, c.number
 	FROM accounts a 
     LEFT JOIN loans l ON a.id = l.account_id 
     LEFT JOIN deposits d ON a.id = d.account_id
-	JOIN currencies c ON a.currency_id = c.id
+	LEFT JOIN cards c ON a.id = c.account_id
+	JOIN currencies cur ON a.currency_id = cur.id
 	WHERE a.owner_id = $1`, userID); err != nil {
 		return nil, err
 	}
@@ -85,28 +86,43 @@ func (r *AccountsRepo) Create(ctx context.Context, toCreate domain.AccountToCrea
 		}
 	}
 
+	if account.Type == "card" {
+		row = tx.QueryRowContext(ctx,
+			`INSERT INTO cards(number, account_id) VALUES ($1, $2) RETURNING number`,
+			toCreate.Number, account.ID)
+
+		if err = row.Scan(&account.Number); err != nil {
+			if err := tx.Rollback(); err != nil {
+				return domain.Account{}, err
+			}
+
+			return domain.Account{}, err
+		}
+	}
+
 	return account, tx.Commit()
 }
 
 func (r *AccountsRepo) Get(ctx context.Context, id int64) (domain.Account, error) {
-	var accounts domain.Account
+	var account domain.Account
 
-	if err := r.db.GetContext(ctx, &accounts, `
-	SELECT a.id, a.title, a.balance, c.code currency, a.type, a.owner_id, a.created_at, 
-	       coalesce(l.term, d.term) AS term, coalesce(l.rate, d.rate) AS rate
+	if err := r.db.GetContext(ctx, &account, `
+	SELECT a.id, a.title, a.balance, cur.code currency, a.type, a.owner_id, a.created_at, 
+	       coalesce(l.term, d.term) AS term, coalesce(l.rate, d.rate) AS rate, c.number
 	FROM accounts a 
     LEFT JOIN loans l ON a.id = l.account_id 
-    LEFT JOIN deposits d ON a.id = d.account_id
-	JOIN currencies c ON a.currency_id = c.id
+    LEFT JOIN deposits d ON a.id = d.account_id 
+	LEFT JOIN cards c ON a.id = c.account_id 
+	JOIN currencies cur ON a.currency_id = cur.id 
 	WHERE a.id = $1`, id); err != nil {
 		if err == sql.ErrNoRows {
 			return domain.Account{}, ErrAccountNotFound
 		}
 
-		return accounts, err
+		return account, err
 	}
 
-	return accounts, nil
+	return account, nil
 }
 
 func (r *AccountsRepo) Update(ctx context.Context, toUpdate domain.AccountToUpdate, id int64, _type string) (domain.Account, error) {
@@ -147,6 +163,19 @@ func (r *AccountsRepo) Update(ctx context.Context, toUpdate domain.AccountToUpda
 		RETURNING d.term, d.rate`, toUpdate.Term, toUpdate.Rate, id)
 
 		if err = row.Scan(&account.Term, &account.Rate); err != nil {
+			if err := tx.Rollback(); err != nil {
+				return account, err
+			}
+
+			return account, err
+		}
+	}
+
+	if _type == "card" {
+		row := tx.QueryRowContext(ctx, `UPDATE cards c SET number = $1 WHERE c.account_id = $2 
+		RETURNING c.number`, toUpdate.Number, id)
+
+		if err = row.Scan(&account.Number); err != nil {
 			if err := tx.Rollback(); err != nil {
 				return account, err
 			}

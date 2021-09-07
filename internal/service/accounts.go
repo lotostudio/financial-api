@@ -61,6 +61,11 @@ func (s *AccountsService) Create(ctx context.Context, toCreate domain.AccountToC
 		return domain.Account{}, ErrInvalidDepositData
 	}
 
+	// Check for required fields of card account
+	if toCreate.Type == "card" && toCreate.Number == nil {
+		return domain.Account{}, ErrInvalidCardData
+	}
+
 	account, err := s.repo.Create(ctx, toCreate, userID, currencyID)
 
 	if err != nil {
@@ -101,6 +106,11 @@ func (s *AccountsService) Update(ctx context.Context, toUpdate domain.AccountToU
 	// Check for required fields of deposit account
 	if instance.Type == "deposit" && (toUpdate.Term == nil || toUpdate.Rate == nil) {
 		return instance, ErrInvalidDepositData
+	}
+
+	// Check for required fields of card account
+	if instance.Type == "card" && toUpdate.Number == nil {
+		return domain.Account{}, ErrInvalidCardData
 	}
 
 	account, err := s.repo.Update(ctx, toUpdate, id, instance.Type)
