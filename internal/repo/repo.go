@@ -25,7 +25,7 @@ type Accounts interface {
 	List(ctx context.Context, userID int64) ([]domain.Account, error)
 	Create(ctx context.Context, toCreate domain.AccountToCreate, userID int64, currencyID int) (domain.Account, error)
 	Get(ctx context.Context, id int64) (domain.Account, error)
-	Update(ctx context.Context, toUpdate domain.AccountToUpdate, id int64, _type string) (domain.Account, error)
+	Update(ctx context.Context, toUpdate domain.AccountToUpdate, id int64, _type domain.AccountType) (domain.Account, error)
 	Delete(ctx context.Context, id int64) error
 }
 

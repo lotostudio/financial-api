@@ -83,7 +83,7 @@ func TestAccountsService_CreateInvalidLoanData(t *testing.T) {
 	toCreate := domain.AccountToCreate{
 		Title:   "",
 		Balance: 0,
-		Type:    "loan",
+		Type:    domain.Loan,
 		Term:    nil,
 		Rate:    nil,
 	}
@@ -102,7 +102,7 @@ func TestAccountsService_CreateInvalidDepositData(t *testing.T) {
 	toCreate := domain.AccountToCreate{
 		Title:   "",
 		Balance: 0,
-		Type:    "deposit",
+		Type:    domain.Deposit,
 		Term:    nil,
 		Rate:    nil,
 	}
@@ -121,7 +121,7 @@ func TestAccountsService_CreateGeneralError(t *testing.T) {
 	toCreate := domain.AccountToCreate{
 		Title:   "qwe",
 		Balance: 123,
-		Type:    "card",
+		Type:    domain.Card,
 	}
 
 	cRepo.EXPECT().Get(ctx, 1).Return(domain.Currency{ID: 1, Code: "KZT"}, nil)
@@ -187,9 +187,9 @@ func TestAccountsService_Update(t *testing.T) {
 
 	aRepo.EXPECT().Get(ctx, accountId).Return(domain.Account{
 		OwnerId: userId,
-		Type:    "card",
+		Type:    domain.Card,
 	}, nil)
-	aRepo.EXPECT().Update(ctx, toUpdate, accountId, "card").Return(domain.Account{}, nil)
+	aRepo.EXPECT().Update(ctx, toUpdate, accountId, domain.Card).Return(domain.Account{}, nil)
 
 	account, err := s.Update(ctx, toUpdate, accountId, userId)
 
@@ -216,7 +216,7 @@ func TestAccountsService_UpdateInvalidLoanData(t *testing.T) {
 
 	aRepo.EXPECT().Get(ctx, accountId).Return(domain.Account{
 		OwnerId: userId,
-		Type:    "loan",
+		Type:    domain.Loan,
 	}, nil)
 
 	_, err := s.Update(ctx, domain.AccountToUpdate{}, accountId, userId)
@@ -231,7 +231,7 @@ func TestAccountsService_UpdateInvalidDepositData(t *testing.T) {
 
 	aRepo.EXPECT().Get(ctx, accountId).Return(domain.Account{
 		OwnerId: userId,
-		Type:    "deposit",
+		Type:    domain.Deposit,
 	}, nil)
 
 	_, err := s.Update(ctx, domain.AccountToUpdate{}, accountId, userId)
@@ -253,9 +253,9 @@ func TestAccountsService_UpdateGeneralError(t *testing.T) {
 
 	aRepo.EXPECT().Get(ctx, accountId).Return(domain.Account{
 		OwnerId: userId,
-		Type:    "card",
+		Type:    domain.Card,
 	}, nil)
-	aRepo.EXPECT().Update(ctx, toUpdate, accountId, "card").Return(domain.Account{}, errors.New("general error"))
+	aRepo.EXPECT().Update(ctx, toUpdate, accountId, domain.Card).Return(domain.Account{}, errors.New("general error"))
 
 	_, err := s.Update(ctx, toUpdate, accountId, userId)
 

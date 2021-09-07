@@ -19,7 +19,7 @@ func TestHandler_listAccountTypes(t *testing.T) {
 	type mockBehaviour func(s *mockService.MockAccountTypes)
 
 	types := []domain.AccountType{
-		"card",
+		domain.Card,
 	}
 
 	setResponseBody := func(currencies []domain.AccountType) string {

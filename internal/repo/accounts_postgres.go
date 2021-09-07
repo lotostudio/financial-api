@@ -57,7 +57,7 @@ func (r *AccountsRepo) Create(ctx context.Context, toCreate domain.AccountToCrea
 		return domain.Account{}, err
 	}
 
-	if account.Type == "loan" {
+	if account.Type == domain.Loan {
 		row = tx.QueryRowContext(ctx,
 			`INSERT INTO loans(term, rate, account_id) VALUES ($1, $2, $3) RETURNING term, rate`,
 			toCreate.Term, toCreate.Rate, account.ID)
@@ -71,7 +71,7 @@ func (r *AccountsRepo) Create(ctx context.Context, toCreate domain.AccountToCrea
 		}
 	}
 
-	if account.Type == "deposit" {
+	if account.Type == domain.Deposit {
 		row = tx.QueryRowContext(ctx,
 			`INSERT INTO deposits(term, rate, account_id) VALUES ($1, $2, $3) RETURNING term, rate`,
 			toCreate.Term, toCreate.Rate, account.ID)
@@ -109,7 +109,7 @@ func (r *AccountsRepo) Get(ctx context.Context, id int64) (domain.Account, error
 	return accounts, nil
 }
 
-func (r *AccountsRepo) Update(ctx context.Context, toUpdate domain.AccountToUpdate, id int64, _type string) (domain.Account, error) {
+func (r *AccountsRepo) Update(ctx context.Context, toUpdate domain.AccountToUpdate, id int64, _type domain.AccountType) (domain.Account, error) {
 	var account domain.Account
 
 	tx, err := r.db.Begin()
@@ -129,7 +129,7 @@ func (r *AccountsRepo) Update(ctx context.Context, toUpdate domain.AccountToUpda
 		return account, err
 	}
 
-	if _type == "loan" {
+	if _type == domain.Loan {
 		row := tx.QueryRowContext(ctx, `UPDATE loans l SET term = $1, rate = $2 WHERE l.account_id = $3 
 		RETURNING l.term, l.rate`, toUpdate.Term, toUpdate.Rate, id)
 
@@ -142,7 +142,7 @@ func (r *AccountsRepo) Update(ctx context.Context, toUpdate domain.AccountToUpda
 		}
 	}
 
-	if _type == "deposit" {
+	if _type == domain.Deposit {
 		row := tx.QueryRowContext(ctx, `UPDATE deposits d SET term = $1, rate = $2 WHERE d.account_id = $3 
 		RETURNING d.term, d.rate`, toUpdate.Term, toUpdate.Rate, id)
 

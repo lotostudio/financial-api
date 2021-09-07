@@ -246,7 +246,7 @@ func (mr *MockAccountsMockRecorder) List(ctx, userID interface{}) *gomock.Call {
 }
 
 // Update mocks base method.
-func (m *MockAccounts) Update(ctx context.Context, toUpdate domain.AccountToUpdate, id int64, _type string) (domain.Account, error) {
+func (m *MockAccounts) Update(ctx context.Context, toUpdate domain.AccountToUpdate, id int64, _type domain.AccountType) (domain.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", ctx, toUpdate, id, _type)
 	ret0, _ := ret[0].(domain.Account)

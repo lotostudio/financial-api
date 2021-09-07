@@ -2,6 +2,14 @@ package domain
 
 import "time"
 
+// Account types
+const (
+	Cash    = AccountType("cash")
+	Card    = AccountType("card")
+	Loan    = AccountType("loan")
+	Deposit = AccountType("deposit")
+)
+
 type Account struct {
 	// Unique id
 	ID int64 `json:"id" binding:"required" db:"id" example:"1"`
@@ -12,8 +20,8 @@ type Account struct {
 	// Currency
 	Currency string `json:"currency" binding:"required" db:"currency" example:"KZT"`
 	// Type (different types have distinct data)
-	Type    string `json:"type" binding:"required,oneof=card cash loan deposit" db:"type" enums:"card,cash,loan,deposit" example:"deposit"`
-	OwnerId int64  `json:"-" db:"owner_id" swaggerignore:"true"`
+	Type    AccountType `json:"type" binding:"required,oneof=card cash loan deposit" db:"type" enums:"card,cash,loan,deposit" example:"deposit"`
+	OwnerId int64       `json:"-" db:"owner_id" swaggerignore:"true"`
 	// Time of creation
 	CreatedAt time.Time `json:"createdAt" binding:"required,datetime" db:"created_at" format:"yyyy-MM-ddThh:mm:ss.ZZZ" example:"2021-09-01T18:03:24.499198Z"`
 	// Applicable for loans and deposits
@@ -32,7 +40,7 @@ type AccountToCreate struct {
 	// Current amount of money
 	Balance float64 `json:"balance" binding:"required,gte=0" example:"123002.12"`
 	// Type (different types have distinct data)
-	Type string `json:"type" binding:"required,oneof=card cash loan deposit" enums:"card,cash,loan,deposit" example:"deposit"`
+	Type AccountType `json:"type" binding:"required,oneof=card cash loan deposit" enums:"card,cash,loan,deposit" example:"deposit"`
 	// In months. Applicable for loans and deposits
 	// * For loans - loan term
 	// * For deposits - term of deposit
