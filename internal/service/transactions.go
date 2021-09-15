@@ -20,8 +20,8 @@ func newTransactionsService(repo repo.Transactions, accountsRepo repo.Accounts, 
 	}
 }
 
-func (s *TransactionsService) List(ctx context.Context, userID int64) ([]domain.Transaction, error) {
-	return s.repo.List(ctx, userID)
+func (s *TransactionsService) List(ctx context.Context, filter domain.TransactionsFilter) ([]domain.Transaction, error) {
+	return s.repo.List(ctx, filter)
 }
 
 func (s *TransactionsService) Create(ctx context.Context, toCreate domain.TransactionToCreate, userID int64,
@@ -124,7 +124,7 @@ func (s *TransactionsService) checkExpense(ctx context.Context, userID int64, cr
 	}
 
 	if creditAcc.OwnerId != userID {
-		return creditAcc, ErrDebitAccountForbidden
+		return creditAcc, ErrCreditAccountForbidden
 	}
 
 	return creditAcc, nil

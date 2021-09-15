@@ -27,6 +27,14 @@ type Transaction struct {
 	Debit     *Account        `json:"debit,omitempty" db:"debit"`
 }
 
+type TransactionsFilter struct {
+	AccountId   *int64
+	OwnerId     *int64
+	Category    *string
+	CreatedFrom *time.Time
+	CreatedTo   *time.Time
+}
+
 type TransactionToCreate struct {
 	Amount    float64         `json:"amount" binding:"required,gte=0" db:"amount" example:"1230.23"`
 	Type      TransactionType `json:"type" binding:"required,oneof=income expense transfer" enums:"income,expense,transfer" example:"income"`

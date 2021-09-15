@@ -39,7 +39,7 @@ type AccountTypes interface {
 }
 
 type Transactions interface {
-	List(ctx context.Context, userID int64) ([]domain.Transaction, error)
+	List(ctx context.Context, filter domain.TransactionsFilter) ([]domain.Transaction, error)
 	Create(ctx context.Context, toCreate domain.TransactionToCreate, userID int64, categoryId *int64, creditId *int64,
 		debitId *int64) (domain.Transaction, error)
 }

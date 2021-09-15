@@ -2,8 +2,10 @@ package repo
 
 import (
 	"context"
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/lotostudio/financial-api/internal/domain"
+	"strings"
 	"time"
 )
 
@@ -17,10 +19,42 @@ func newTransactionsRepo(db *sqlx.DB) *TransactionsRepo {
 	}
 }
 
-func (r *TransactionsRepo) List(ctx context.Context, userID int64) ([]domain.Transaction, error) {
-	transactions := make([]domain.Transaction, 0)
+func (r *TransactionsRepo) List(ctx context.Context, filter domain.TransactionsFilter) ([]domain.Transaction, error) {
+	setValues := make([]string, 0)
+	args := make([]interface{}, 0)
+	var argId = 1
 
-	rows, err := r.db.QueryContext(ctx, `
+	setValues = append(setValues, "1 = 1")
+
+	if filter.OwnerId != nil {
+		setValues = append(setValues, fmt.Sprintf("(cr.owner_id = $%d OR db.owner_id = $%d)", argId, argId))
+		args = append(args, *filter.OwnerId)
+		argId++
+	}
+
+	if filter.AccountId != nil {
+		setValues = append(setValues, fmt.Sprintf("(cr.id=$%d OR db.id=$%d)", argId, argId))
+		args = append(args, *filter.AccountId)
+		argId++
+	}
+
+	if filter.Category != nil {
+		setValues = append(setValues, fmt.Sprintf("tc.title=$%d", argId))
+		args = append(args, *filter.Category)
+		argId++
+	}
+
+	if filter.CreatedFrom != nil && filter.CreatedTo != nil {
+		setValues = append(setValues, fmt.Sprintf("t.created_at BETWEEN $%d AND $%d", argId, argId+1))
+		args = append(args, *filter.CreatedFrom, *filter.CreatedTo)
+
+		// last argId increasing must be marked as nolint
+		argId = argId + 2	//nolint
+	}
+
+	// Create WHERE statement variables with separated by ANDs
+	setQuery := strings.Join(setValues, " AND ")
+	query := fmt.Sprintf(`
 	SELECT t.id, t.amount, t.type, tc.title AS category, t.created_at, 
 	       cr.id, cr.title, cr.balance, cr_c.code, cr.type, cr.created_at, 
 	       db.id, db.title, db.balance, db_c.code, db.type, db.created_at
@@ -30,11 +64,15 @@ func (r *TransactionsRepo) List(ctx context.Context, userID int64) ([]domain.Tra
 	LEFT JOIN currencies cr_c ON cr.currency_id = cr_c.id
 	LEFT JOIN accounts db ON t.debit_id = db.id
 	LEFT JOIN currencies db_c ON db.currency_id = db_c.id
-	WHERE cr.owner_id = $1 OR db.owner_id = $1`, userID)
+	WHERE %s`, setQuery)
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
 
 	if err != nil {
 		return nil, err
 	}
+
+	transactions := make([]domain.Transaction, 0)
 
 	for rows.Next() {
 		tr := domain.Transaction{}
