@@ -38,20 +38,35 @@ type AccountTypes interface {
 	List(ctx context.Context) ([]domain.AccountType, error)
 }
 
+type Transactions interface {
+	List(ctx context.Context, userID int64) ([]domain.Transaction, error)
+	Create(ctx context.Context, toCreate domain.TransactionToCreate, userID int64, categoryId *int64, creditId *int64,
+		debitId *int64) (domain.Transaction, error)
+}
+
+type TransactionCategories interface {
+	List(ctx context.Context) ([]domain.TransactionCategory, error)
+	ListByType(ctx context.Context, _type domain.TransactionType) ([]domain.TransactionCategory, error)
+}
+
 type Services struct {
 	Users
 	Auth
 	Currencies
 	Accounts
 	AccountTypes
+	Transactions
+	TransactionCategories
 }
 
 func NewServices(repos *repo.Repos, hasher hash.PasswordHasher, tokenManager auth.TokenManager) *Services {
 	return &Services{
-		Users:        newUsersService(repos.Users, hasher),
-		Auth:         newAuthService(repos.Users, hasher, tokenManager),
-		Currencies:   newCurrenciesService(repos.Currencies),
-		Accounts:     newAccountsService(repos.Accounts, repos.Currencies),
-		AccountTypes: newAccountTypesService(repos.AccountTypes),
+		Users:                 newUsersService(repos.Users, hasher),
+		Auth:                  newAuthService(repos.Users, hasher, tokenManager),
+		Currencies:            newCurrenciesService(repos.Currencies),
+		Accounts:              newAccountsService(repos.Accounts, repos.Currencies),
+		AccountTypes:          newAccountTypesService(repos.AccountTypes),
+		Transactions:          newTransactionsService(repos.Transactions, repos.Accounts, repos.TransactionCategories),
+		TransactionCategories: newTransactionCategoriesService(repos.TransactionCategories),
 	}
 }

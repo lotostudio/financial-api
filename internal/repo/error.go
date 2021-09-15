@@ -8,5 +8,8 @@ var (
 
 	ErrCurrencyNotFound = errors.New("currency doesn't exists")
 
-	ErrAccountNotFound = errors.New("account doesn't exists")
+	ErrTransactionCategoryNotFound = errors.New("transaction category doesn't exists")
+
+	ErrAccountNotFound         = errors.New("account doesn't exists")
+	ErrAccountNotEnoughBalance = errors.New("account doesn't have enough balance")
 )
