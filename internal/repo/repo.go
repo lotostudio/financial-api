@@ -33,18 +33,42 @@ type AccountTypes interface {
 	List(ctx context.Context) ([]domain.AccountType, error)
 }
 
+type Transactions interface {
+	List(ctx context.Context, filter domain.TransactionsFilter) ([]domain.Transaction, error)
+	Create(ctx context.Context, toCreate domain.TransactionToCreate, categoryId *int64, creditId *int64,
+		debitId *int64) (domain.Transaction, error)
+	GetOwner(ctx context.Context, id int64) (int64, error)
+	Delete(ctx context.Context, id int64) error
+}
+
+type TransactionCategories interface {
+	List(ctx context.Context) ([]domain.TransactionCategory, error)
+	ListByType(ctx context.Context, _type domain.TransactionType) ([]domain.TransactionCategory, error)
+	Get(ctx context.Context, id int64) (domain.TransactionCategory, error)
+}
+
+type TransactionTypes interface {
+	List(ctx context.Context) ([]domain.TransactionType, error)
+}
+
 type Repos struct {
 	Users
 	Currencies
 	Accounts
 	AccountTypes
+	Transactions
+	TransactionCategories
+	TransactionTypes
 }
 
 func NewRepos(db *sqlx.DB) *Repos {
 	return &Repos{
-		Users:        newUsersRepo(db),
-		Currencies:   newCurrenciesRepo(db),
-		Accounts:     newAccountsRepo(db),
-		AccountTypes: newAccountTypesRepo(db),
+		Users:                 newUsersRepo(db),
+		Currencies:            newCurrenciesRepo(db),
+		Accounts:              newAccountsRepo(db),
+		AccountTypes:          newAccountTypesRepo(db),
+		Transactions:          newTransactionsRepo(db),
+		TransactionCategories: newTransactionCategoriesRepo(db),
+		TransactionTypes:      newTransactionTypesRepo(db),
 	}
 }

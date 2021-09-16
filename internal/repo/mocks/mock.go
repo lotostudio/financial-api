@@ -297,3 +297,191 @@ func (mr *MockAccountTypesMockRecorder) List(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockAccountTypes)(nil).List), ctx)
 }
+
+// MockTransactions is a mock of Transactions interface.
+type MockTransactions struct {
+	ctrl     *gomock.Controller
+	recorder *MockTransactionsMockRecorder
+}
+
+// MockTransactionsMockRecorder is the mock recorder for MockTransactions.
+type MockTransactionsMockRecorder struct {
+	mock *MockTransactions
+}
+
+// NewMockTransactions creates a new mock instance.
+func NewMockTransactions(ctrl *gomock.Controller) *MockTransactions {
+	mock := &MockTransactions{ctrl: ctrl}
+	mock.recorder = &MockTransactionsMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockTransactions) EXPECT() *MockTransactionsMockRecorder {
+	return m.recorder
+}
+
+// Create mocks base method.
+func (m *MockTransactions) Create(ctx context.Context, toCreate domain.TransactionToCreate, categoryId, creditId, debitId *int64) (domain.Transaction, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", ctx, toCreate, categoryId, creditId, debitId)
+	ret0, _ := ret[0].(domain.Transaction)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockTransactionsMockRecorder) Create(ctx, toCreate, categoryId, creditId, debitId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockTransactions)(nil).Create), ctx, toCreate, categoryId, creditId, debitId)
+}
+
+// Delete mocks base method.
+func (m *MockTransactions) Delete(ctx context.Context, id int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *MockTransactionsMockRecorder) Delete(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockTransactions)(nil).Delete), ctx, id)
+}
+
+// GetOwner mocks base method.
+func (m *MockTransactions) GetOwner(ctx context.Context, id int64) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOwner", ctx, id)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOwner indicates an expected call of GetOwner.
+func (mr *MockTransactionsMockRecorder) GetOwner(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOwner", reflect.TypeOf((*MockTransactions)(nil).GetOwner), ctx, id)
+}
+
+// List mocks base method.
+func (m *MockTransactions) List(ctx context.Context, filter domain.TransactionsFilter) ([]domain.Transaction, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "List", ctx, filter)
+	ret0, _ := ret[0].([]domain.Transaction)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// List indicates an expected call of List.
+func (mr *MockTransactionsMockRecorder) List(ctx, filter interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockTransactions)(nil).List), ctx, filter)
+}
+
+// MockTransactionCategories is a mock of TransactionCategories interface.
+type MockTransactionCategories struct {
+	ctrl     *gomock.Controller
+	recorder *MockTransactionCategoriesMockRecorder
+}
+
+// MockTransactionCategoriesMockRecorder is the mock recorder for MockTransactionCategories.
+type MockTransactionCategoriesMockRecorder struct {
+	mock *MockTransactionCategories
+}
+
+// NewMockTransactionCategories creates a new mock instance.
+func NewMockTransactionCategories(ctrl *gomock.Controller) *MockTransactionCategories {
+	mock := &MockTransactionCategories{ctrl: ctrl}
+	mock.recorder = &MockTransactionCategoriesMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockTransactionCategories) EXPECT() *MockTransactionCategoriesMockRecorder {
+	return m.recorder
+}
+
+// Get mocks base method.
+func (m *MockTransactionCategories) Get(ctx context.Context, id int64) (domain.TransactionCategory, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Get", ctx, id)
+	ret0, _ := ret[0].(domain.TransactionCategory)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get indicates an expected call of Get.
+func (mr *MockTransactionCategoriesMockRecorder) Get(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockTransactionCategories)(nil).Get), ctx, id)
+}
+
+// List mocks base method.
+func (m *MockTransactionCategories) List(ctx context.Context) ([]domain.TransactionCategory, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "List", ctx)
+	ret0, _ := ret[0].([]domain.TransactionCategory)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// List indicates an expected call of List.
+func (mr *MockTransactionCategoriesMockRecorder) List(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockTransactionCategories)(nil).List), ctx)
+}
+
+// ListByType mocks base method.
+func (m *MockTransactionCategories) ListByType(ctx context.Context, _type domain.TransactionType) ([]domain.TransactionCategory, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListByType", ctx, _type)
+	ret0, _ := ret[0].([]domain.TransactionCategory)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListByType indicates an expected call of ListByType.
+func (mr *MockTransactionCategoriesMockRecorder) ListByType(ctx, _type interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListByType", reflect.TypeOf((*MockTransactionCategories)(nil).ListByType), ctx, _type)
+}
+
+// MockTransactionTypes is a mock of TransactionTypes interface.
+type MockTransactionTypes struct {
+	ctrl     *gomock.Controller
+	recorder *MockTransactionTypesMockRecorder
+}
+
+// MockTransactionTypesMockRecorder is the mock recorder for MockTransactionTypes.
+type MockTransactionTypesMockRecorder struct {
+	mock *MockTransactionTypes
+}
+
+// NewMockTransactionTypes creates a new mock instance.
+func NewMockTransactionTypes(ctrl *gomock.Controller) *MockTransactionTypes {
+	mock := &MockTransactionTypes{ctrl: ctrl}
+	mock.recorder = &MockTransactionTypesMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockTransactionTypes) EXPECT() *MockTransactionTypesMockRecorder {
+	return m.recorder
+}
+
+// List mocks base method.
+func (m *MockTransactionTypes) List(ctx context.Context) ([]domain.TransactionType, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "List", ctx)
+	ret0, _ := ret[0].([]domain.TransactionType)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// List indicates an expected call of List.
+func (mr *MockTransactionTypesMockRecorder) List(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockTransactionTypes)(nil).List), ctx)
+}
