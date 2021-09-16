@@ -447,3 +447,41 @@ func (mr *MockTransactionCategoriesMockRecorder) ListByType(ctx, _type interface
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListByType", reflect.TypeOf((*MockTransactionCategories)(nil).ListByType), ctx, _type)
 }
+
+// MockTransactionTypes is a mock of TransactionTypes interface.
+type MockTransactionTypes struct {
+	ctrl     *gomock.Controller
+	recorder *MockTransactionTypesMockRecorder
+}
+
+// MockTransactionTypesMockRecorder is the mock recorder for MockTransactionTypes.
+type MockTransactionTypesMockRecorder struct {
+	mock *MockTransactionTypes
+}
+
+// NewMockTransactionTypes creates a new mock instance.
+func NewMockTransactionTypes(ctrl *gomock.Controller) *MockTransactionTypes {
+	mock := &MockTransactionTypes{ctrl: ctrl}
+	mock.recorder = &MockTransactionTypesMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockTransactionTypes) EXPECT() *MockTransactionTypesMockRecorder {
+	return m.recorder
+}
+
+// List mocks base method.
+func (m *MockTransactionTypes) List(ctx context.Context) ([]domain.TransactionType, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "List", ctx)
+	ret0, _ := ret[0].([]domain.TransactionType)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// List indicates an expected call of List.
+func (mr *MockTransactionTypesMockRecorder) List(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockTransactionTypes)(nil).List), ctx)
+}

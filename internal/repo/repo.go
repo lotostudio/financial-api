@@ -47,6 +47,10 @@ type TransactionCategories interface {
 	Get(ctx context.Context, id int64) (domain.TransactionCategory, error)
 }
 
+type TransactionTypes interface {
+	List(ctx context.Context) ([]domain.TransactionType, error)
+}
+
 type Repos struct {
 	Users
 	Currencies
@@ -54,6 +58,7 @@ type Repos struct {
 	AccountTypes
 	Transactions
 	TransactionCategories
+	TransactionTypes
 }
 
 func NewRepos(db *sqlx.DB) *Repos {
@@ -64,5 +69,6 @@ func NewRepos(db *sqlx.DB) *Repos {
 		AccountTypes:          newAccountTypesRepo(db),
 		Transactions:          newTransactionsRepo(db),
 		TransactionCategories: newTransactionCategoriesRepo(db),
+		TransactionTypes:      newTransactionTypesRepo(db),
 	}
 }
