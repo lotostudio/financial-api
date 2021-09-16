@@ -149,3 +149,17 @@ func (s *TransactionsService) checkTransfer(ctx context.Context, userID int64, c
 
 	return nil
 }
+
+func (s *TransactionsService) Delete(ctx context.Context, id int64, userID int64) error {
+	ownerId, err := s.repo.GetOwner(ctx, id)
+
+	if err != nil {
+		return err
+	}
+
+	if ownerId != userID {
+		return ErrTransactionForbidden
+	}
+
+	return s.repo.Delete(ctx, id)
+}

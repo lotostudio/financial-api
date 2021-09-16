@@ -16,10 +16,11 @@ const (
 )
 
 func (h *Handler) initTransactionsRoutes(api *gin.RouterGroup) {
-	accounts := api.Group("/transactions", h.userIdentity)
+	transactions := api.Group("/transactions", h.userIdentity)
 	{
-		accounts.GET("", h.listTransactions)
-		accounts.POST("", h.createTransaction)
+		transactions.GET("", h.listTransactions)
+		transactions.POST("", h.createTransaction)
+		transactions.DELETE("/:id", h.deleteTransaction)
 	}
 }
 
@@ -27,6 +28,7 @@ func (h *Handler) initTransactionsRoutes(api *gin.RouterGroup) {
 // @Tags transactions
 // @Description List transactions
 // @ID listTransactions
+// @Security UsersAuth
 // @Accept json
 // @Produce json
 // @Param category query string false "Type of category"
@@ -75,6 +77,7 @@ func (h *Handler) listTransactions(c *gin.Context) {
 // @Tags transactions
 // @Description List transactions of account
 // @ID listTransactionsOfAccount
+// @Security UsersAuth
 // @Accept json
 // @Produce json
 // @Param id path int true "Id of account"
@@ -203,6 +206,7 @@ func (h *Handler) parseTransactionsFilter(c *gin.Context) (domain.TransactionsFi
 // @Description * expense - pass credit account and transaction category
 // @Description * transfer - pass credit and debit accounts
 // @ID createTransaction
+// @Security UsersAuth
 // @Accept json
 // @Produce json
 // @Param categoryId query int false "Id of category"
@@ -299,4 +303,65 @@ func (h *Handler) createTransaction(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, transaction)
+}
+
+// @Summary Delete transaction
+// @Tags transactions
+// @Description Delete transaction
+// @ID deleteTransaction
+// @Security UsersAuth
+// @Accept json
+// @Produce json
+// @Param id path int64 true "Id of transaction"
+// @Success 204 {null} nil "Operation finished successfully"
+// @Failure 400 {object} response "Invalid request"
+// @Failure 401 {object} response "Invalid authorization"
+// @Failure 403 {object} response "Invalid access"
+// @Failure 500 {object} response "Server error"
+// @Router /transactions/{id} [delete]
+func (h *Handler) deleteTransaction(c *gin.Context) {
+	userIdString, ok := c.Get("userId")
+
+	if !ok {
+		newResponse(c, http.StatusInternalServerError, "user not found")
+		return
+	}
+
+	userId, err := strconv.ParseInt(userIdString.(string), 10, 64)
+
+	if err != nil {
+		newResponse(c, http.StatusInternalServerError, "user not found")
+		return
+	}
+
+	idString := c.Param("id")
+
+	if idString == "" {
+		newResponse(c, http.StatusBadRequest, "path param 'id' missing")
+		return
+	}
+
+	id, err := strconv.ParseInt(idString, 10, 64)
+
+	if err != nil {
+		newResponse(c, http.StatusBadRequest, "path param 'id' must be integer - "+err.Error())
+		return
+	}
+
+	if err = h.services.Transactions.Delete(c.Request.Context(), id, userId); err != nil {
+		if err == repo.ErrTransactionNotFound || err == repo.ErrAccountNotEnoughBalance {
+			newResponse(c, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		if err == service.ErrTransactionForbidden {
+			newResponse(c, http.StatusForbidden, err.Error())
+			return
+		}
+
+		newResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }

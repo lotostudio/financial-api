@@ -49,7 +49,7 @@ func (r *TransactionsRepo) List(ctx context.Context, filter domain.TransactionsF
 		args = append(args, *filter.CreatedFrom, *filter.CreatedTo)
 
 		// last argId increasing must be marked as nolint
-		argId = argId + 2	//nolint
+		argId = argId + 2 //nolint
 	}
 
 	// Create WHERE statement variables with separated by ANDs
@@ -175,4 +175,94 @@ func (r *TransactionsRepo) Create(ctx context.Context, toCreate domain.Transacti
 	}
 
 	return transaction, tx.Commit()
+}
+
+func (r *TransactionsRepo) GetOwner(ctx context.Context, id int64) (int64, error) {
+	rows, err := r.db.QueryContext(ctx, `
+	SELECT cr.owner_id, db.owner_id 
+	FROM transactions t
+	LEFT JOIN accounts cr ON t.credit_id = cr.id
+	LEFT JOIN accounts db ON t.debit_id = db.id
+	WHERE t.id = $1`, id)
+
+	if err != nil {
+		return 0, err
+	}
+
+	if !rows.Next() {
+		return 0, ErrTransactionNotFound
+	}
+
+	var creditOwner, debitOwner *int64
+
+	if err = rows.Scan(&creditOwner, &debitOwner); err != nil {
+		return 0, err
+	}
+
+	if creditOwner != nil {
+		return *creditOwner, nil
+	}
+
+	if debitOwner != nil {
+		return *debitOwner, nil
+	}
+
+	return 0, ErrTransactionOwnerNotFound
+}
+
+func (r *TransactionsRepo) Delete(ctx context.Context, id int64) error {
+	tx, err := r.db.Begin()
+
+	if err != nil {
+		return err
+	}
+
+	var creditAccId, debitAccId *int64
+	var amount float64
+
+	row := tx.QueryRowContext(ctx,
+		"DELETE FROM transactions t WHERE t.id = $1 RETURNING t.credit_id, t.debit_id, t.amount", id)
+
+	if err = row.Scan(&creditAccId, &debitAccId, &amount); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	if creditAccId != nil {
+		if _, err = tx.ExecContext(ctx,
+			"UPDATE accounts SET balance = balance + $1 WHERE id = $2", amount, creditAccId); err != nil {
+			if err := tx.Rollback(); err != nil {
+				return err
+			}
+
+			return err
+		}
+	}
+
+	if debitAccId != nil {
+		row = tx.QueryRowContext(ctx,
+			"UPDATE accounts SET balance = balance - $1 WHERE id = $2 RETURNING balance", amount, debitAccId)
+		var balance float64
+
+		if err = row.Scan(&balance); err != nil {
+			if err := tx.Rollback(); err != nil {
+				return err
+			}
+
+			return err
+		}
+
+		if balance < 0 {
+			if err = tx.Rollback(); err != nil {
+				return err
+			}
+
+			return ErrAccountNotEnoughBalance
+		}
+	}
+
+	return tx.Commit()
 }

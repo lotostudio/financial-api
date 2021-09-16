@@ -37,6 +37,8 @@ type Transactions interface {
 	List(ctx context.Context, filter domain.TransactionsFilter) ([]domain.Transaction, error)
 	Create(ctx context.Context, toCreate domain.TransactionToCreate, categoryId *int64, creditId *int64,
 		debitId *int64) (domain.Transaction, error)
+	GetOwner(ctx context.Context, id int64) (int64, error)
+	Delete(ctx context.Context, id int64) error
 }
 
 type TransactionCategories interface {
