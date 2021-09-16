@@ -206,7 +206,7 @@ func TestHandler_listTransactionsOfAccount(t *testing.T) {
 func TestHandler_createTransaction(t *testing.T) {
 	type mockBehaviour func(s *mockService.MockTransactions)
 
-	date := time.Date(2021, time.September, 11, 21, 23, 21, 0, time.Local)
+	date := time.Date(2021, time.September, 11, 21, 23, 21, 0, time.UTC)
 	dateString := date.Format("2006-01-02T15:04:05.999999999Z07:00")
 
 	toCreate := domain.TransactionToCreate{
