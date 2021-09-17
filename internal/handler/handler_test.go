@@ -12,7 +12,7 @@ import (
 )
 
 func TestNewHandler(t *testing.T) {
-	tokenManager, _ := auth.NewJWTManager("key", 5*time.Second)
+	tokenManager, _ := auth.NewJWTManager("key", 5*time.Second, 32)
 
 	h := NewHandler(&service.Services{}, tokenManager)
 
@@ -20,7 +20,7 @@ func TestNewHandler(t *testing.T) {
 }
 
 func TestNewHandler_Init(t *testing.T) {
-	tokenManager, _ := auth.NewJWTManager("key", 5*time.Second)
+	tokenManager, _ := auth.NewJWTManager("key", 5*time.Second, 32)
 
 	h := NewHandler(&service.Services{}, tokenManager)
 

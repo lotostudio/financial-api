@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"math/rand"
 	"time"
 )
 
@@ -11,21 +12,24 @@ import (
 type TokenManager interface {
 	Issue(subject string) (string, error)
 	Decode(token string) (string, error)
+	Random() (string, error)
 }
 
 type JWTManager struct {
-	signingKey     string
-	accessTokenTTL time.Duration
+	signingKey        string
+	accessTokenTTL    time.Duration
+	randomTokenLength int
 }
 
-func NewJWTManager(signingKey string, accessTokenTTL time.Duration) (*JWTManager, error) {
+func NewJWTManager(signingKey string, accessTokenTTL time.Duration, randomTokenLength int) (*JWTManager, error) {
 	if signingKey == "" {
 		return nil, errors.New("empty signing key")
 	}
 
 	return &JWTManager{
-		signingKey:     signingKey,
-		accessTokenTTL: accessTokenTTL,
+		signingKey:        signingKey,
+		accessTokenTTL:    accessTokenTTL,
+		randomTokenLength: randomTokenLength,
 	}, nil
 }
 
@@ -57,4 +61,17 @@ func (m *JWTManager) Decode(token string) (string, error) {
 	}
 
 	return claims["sub"].(string), nil
+}
+
+func (m *JWTManager) Random() (string, error) {
+	b := make([]byte, m.randomTokenLength)
+
+	s := rand.NewSource(time.Now().Unix())
+	r := rand.New(s)
+
+	if _, err := r.Read(b); err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%x", b), nil
 }

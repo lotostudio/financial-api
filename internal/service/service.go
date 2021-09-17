@@ -6,6 +6,7 @@ import (
 	"github.com/lotostudio/financial-api/internal/repo"
 	"github.com/lotostudio/financial-api/pkg/auth"
 	"github.com/lotostudio/financial-api/pkg/hash"
+	"time"
 )
 
 //go:generate mockgen -source=service.go -destination=mocks/mock.go
@@ -19,6 +20,7 @@ type Users interface {
 type Auth interface {
 	Register(ctx context.Context, user domain.UserToCreate) (domain.User, error)
 	Login(ctx context.Context, user domain.UserToLogin) (domain.Tokens, error)
+	Refresh(ctx context.Context, token string) (domain.Tokens, error)
 }
 
 type Currencies interface {
@@ -65,10 +67,11 @@ type Services struct {
 	TransactionTypes
 }
 
-func NewServices(repos *repo.Repos, hasher hash.PasswordHasher, tokenManager auth.TokenManager) *Services {
+func NewServices(repos *repo.Repos, hasher hash.PasswordHasher, tokenManager auth.TokenManager,
+	accessTokenTTL time.Duration, refreshTokenTTL time.Duration) *Services {
 	return &Services{
 		Users:                 newUsersService(repos.Users, hasher),
-		Auth:                  newAuthService(repos.Users, hasher, tokenManager),
+		Auth:                  newAuthService(repos.Users, repos.Sessions, hasher, tokenManager, accessTokenTTL, refreshTokenTTL),
 		Currencies:            newCurrenciesService(repos.Currencies),
 		Accounts:              newAccountsService(repos.Accounts, repos.Currencies),
 		AccountTypes:          newAccountTypesService(repos.AccountTypes),

@@ -2,37 +2,32 @@ package auth
 
 import (
 	"github.com/stretchr/testify/require"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"testing"
 	"time"
 )
 
-var (
-	token  = ""
-	userId = primitive.NewObjectID().String()
-)
+func newTestJWTManager(t *testing.T) TokenManager {
+	m, err := NewJWTManager("key", time.Duration(1)*time.Hour, 32)
+
+	require.NoError(t, err)
+
+	return m
+}
 
 func TestNewJWTManager_emptyKey(t *testing.T) {
-	_, err := NewJWTManager("", time.Duration(1)*time.Hour)
+	_, err := NewJWTManager("", time.Duration(1)*time.Hour, 32)
 
 	require.Errorf(t, err, "empty signing key")
 }
 
-func TestJWTManager_Issue(t *testing.T) {
-	m, err := NewJWTManager("key", time.Duration(1)*time.Hour)
+func TestJWTManager_IssueAndDecode(t *testing.T) {
+	m := newTestJWTManager(t)
+	userId := "1"
 
-	require.NoError(t, err)
-
-	token, err = m.Issue(userId)
+	token, err := m.Issue(userId)
 
 	require.NoError(t, err)
 	require.NotNil(t, token)
-}
-
-func TestJWTManager_Decode(t *testing.T) {
-	m, err := NewJWTManager("key", time.Duration(1)*time.Hour)
-
-	require.NoError(t, err)
 
 	id, err := m.Decode(token)
 
@@ -41,11 +36,17 @@ func TestJWTManager_Decode(t *testing.T) {
 }
 
 func TestJWTManager_DecodeErr(t *testing.T) {
-	m, err := NewJWTManager("key", time.Duration(1)*time.Hour)
+	m := newTestJWTManager(t)
 
-	require.NoError(t, err)
-
-	_, err = m.Decode("qwe")
+	_, err := m.Decode("qwe")
 
 	require.Error(t, err)
+}
+
+func TestJWTManager_Refresh(t *testing.T) {
+	m := newTestJWTManager(t)
+
+	_, err := m.Random()
+
+	require.NoError(t, err)
 }
