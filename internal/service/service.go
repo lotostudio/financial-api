@@ -40,21 +40,43 @@ type AccountTypes interface {
 	List(ctx context.Context) ([]domain.AccountType, error)
 }
 
+type Transactions interface {
+	List(ctx context.Context, filter domain.TransactionsFilter) ([]domain.Transaction, error)
+	Create(ctx context.Context, toCreate domain.TransactionToCreate, userID int64, categoryId *int64, creditId *int64,
+		debitId *int64) (domain.Transaction, error)
+	Delete(ctx context.Context, id int64, userID int64) error
+}
+
+type TransactionCategories interface {
+	List(ctx context.Context) ([]domain.TransactionCategory, error)
+	ListByType(ctx context.Context, _type domain.TransactionType) ([]domain.TransactionCategory, error)
+}
+
+type TransactionTypes interface {
+	List(ctx context.Context) ([]domain.TransactionType, error)
+}
+
 type Services struct {
 	Users
 	Auth
 	Currencies
 	Accounts
 	AccountTypes
+	Transactions
+	TransactionCategories
+	TransactionTypes
 }
 
 func NewServices(repos *repo.Repos, hasher hash.PasswordHasher, tokenManager auth.TokenManager,
 	accessTokenTTL time.Duration, refreshTokenTTL time.Duration) *Services {
 	return &Services{
-		Users:        newUsersService(repos.Users, hasher),
-		Auth:         newAuthService(repos.Users, repos.Sessions, hasher, tokenManager, accessTokenTTL, refreshTokenTTL),
-		Currencies:   newCurrenciesService(repos.Currencies),
-		Accounts:     newAccountsService(repos.Accounts, repos.Currencies),
-		AccountTypes: newAccountTypesService(repos.AccountTypes),
+		Users:                 newUsersService(repos.Users, hasher),
+		Auth:                  newAuthService(repos.Users, repos.Sessions, hasher, tokenManager, accessTokenTTL, refreshTokenTTL),
+		Currencies:            newCurrenciesService(repos.Currencies),
+		Accounts:              newAccountsService(repos.Accounts, repos.Currencies),
+		AccountTypes:          newAccountTypesService(repos.AccountTypes),
+		Transactions:          newTransactionsService(repos.Transactions, repos.Accounts, repos.TransactionCategories),
+		TransactionCategories: newTransactionCategoriesService(repos.TransactionCategories),
+		TransactionTypes:      newTransactionTypesService(repos.TransactionTypes),
 	}
 }

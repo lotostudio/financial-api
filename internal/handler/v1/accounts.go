@@ -15,9 +15,18 @@ func (h *Handler) initAccountsRoutes(api *gin.RouterGroup) {
 		accounts.GET("", h.listAccounts)
 		accounts.GET("/grouped", h.listGropedAccounts)
 		accounts.POST("", h.createAccount)
-		accounts.GET("/:id", h.getAccount)
-		accounts.PUT("/:id", h.updateAccount)
-		accounts.DELETE("/:id", h.deleteAccount)
+
+		account := accounts.Group("/:id")
+		{
+			account.GET("", h.getAccount)
+			account.PUT("", h.updateAccount)
+			account.DELETE("", h.deleteAccount)
+
+			transactions := account.Group("/transactions")
+			{
+				transactions.GET("", h.listTransactionsOfAccount)
+			}
+		}
 	}
 }
 
