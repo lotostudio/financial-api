@@ -35,9 +35,11 @@ type Config struct {
 	} `yaml:"db"`
 
 	Auth struct {
-		AccessTokenTTL time.Duration `yaml:"access-token-ttl" envconfig:"AUTH_ACCESS_TOKEN_TTL"`
-		PasswordSalt   string        `yaml:"password-salt" envconfig:"AUTH_PASSWORD_SALT"`
-		JWT            struct {
+		AccessTokenTTL     time.Duration `yaml:"access-token-ttl" envconfig:"AUTH_ACCESS_TOKEN_TTL"`
+		RefreshTokenTTL    time.Duration `yaml:"refresh-token-ttl" envconfig:"AUTH_REFRESH_TOKEN_TTL"`
+		RefreshTokenLength int           `yaml:"refresh-token-length" envconfig:"AUTH_REFRESH_TOKEN_LENGTH"`
+		PasswordSalt       string        `yaml:"password-salt" envconfig:"AUTH_PASSWORD_SALT"`
+		JWT                struct {
 			Key string `yaml:"key" envconfig:"AUTH_JWT_KEY"`
 		} `yaml:"jwt"`
 	} `yaml:"auth"`

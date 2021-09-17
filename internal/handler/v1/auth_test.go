@@ -3,6 +3,7 @@ package v1
 import (
 	"bytes"
 	"context"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/assert/v2"
 	"github.com/golang/mock/gomock"
@@ -68,6 +69,21 @@ func TestHandler_register(t *testing.T) {
 			statusCode:   400,
 			responseBody: `{"message":"user already exists"}`,
 		},
+		{
+			name:        "error",
+			requestBody: `{"firstName": "Sirius", "lastName": "Sam", "email": "qweqweqwe@gmail.com", "password": "qweqweqwe"}`,
+			requestUser: domain.UserToCreate{
+				FirstName: "Sirius",
+				LastName:  "Sam",
+				Email:     "qweqweqwe@gmail.com",
+				Password:  "qweqweqwe",
+			},
+			mockBehaviour: func(s *mockService.MockAuth, user domain.UserToCreate) {
+				s.EXPECT().Register(context.Background(), user).Return(domain.User{}, errors.New("general error"))
+			},
+			statusCode:   500,
+			responseBody: `{"message":"general error"}`,
+		},
 	}
 
 	for _, tt := range tests {
@@ -122,11 +138,12 @@ func TestHandler_login(t *testing.T) {
 			},
 			mockBehaviour: func(s *mockService.MockAuth, user domain.UserToLogin) {
 				s.EXPECT().Login(context.Background(), user).Return(domain.Tokens{
-					AccessToken: "token",
+					AccessToken:  "token",
+					RefreshToken: "token",
 				}, nil)
 			},
 			statusCode:   200,
-			responseBody: `{"accessToken":"token"}`,
+			responseBody: `{"accessToken":"token","refreshToken":"token"}`,
 		},
 		{
 			name:          "invalid request body",
@@ -147,6 +164,19 @@ func TestHandler_login(t *testing.T) {
 			},
 			statusCode:   400,
 			responseBody: `{"message":"user doesn't exists"}`,
+		},
+		{
+			name:        "error",
+			requestBody: `{"email": "qweqweqwe@gmail.com", "password": "qweqweqwe"}`,
+			requestUser: domain.UserToLogin{
+				Email:    "qweqweqwe@gmail.com",
+				Password: "qweqweqwe",
+			},
+			mockBehaviour: func(s *mockService.MockAuth, user domain.UserToLogin) {
+				s.EXPECT().Login(context.Background(), user).Return(domain.Tokens{}, errors.New("general error"))
+			},
+			statusCode:   500,
+			responseBody: `{"message":"general error"}`,
 		},
 	}
 
@@ -171,6 +201,90 @@ func TestHandler_login(t *testing.T) {
 			// Create Request
 			w := httptest.NewRecorder()
 			req := httptest.NewRequest("POST", "/login", bytes.NewBufferString(tt.requestBody))
+
+			// Make Request
+			r.ServeHTTP(w, req)
+
+			// Assert
+			assert.Equal(t, tt.statusCode, w.Code)
+			assert.Equal(t, tt.responseBody, w.Body.String())
+		})
+	}
+}
+
+func TestHandler_refresh(t *testing.T) {
+	type mockBehaviour func(s *mockService.MockAuth)
+
+	token := "token"
+
+	tests := []struct {
+		name          string
+		authHeader    string
+		mockBehaviour mockBehaviour
+		statusCode    int
+		responseBody  string
+	}{
+		{
+			name:       "ok",
+			authHeader: "Bearer " + token,
+			mockBehaviour: func(s *mockService.MockAuth) {
+				s.EXPECT().Refresh(context.Background(), token).Return(domain.Tokens{
+					AccessToken:  "token",
+					RefreshToken: "token",
+				}, nil)
+			},
+			statusCode:   200,
+			responseBody: `{"accessToken":"token","refreshToken":"token"}`,
+		},
+		{
+			name:       "expired token",
+			authHeader: "Bearer " + token,
+			mockBehaviour: func(s *mockService.MockAuth) {
+				s.EXPECT().Refresh(context.Background(), token).Return(domain.Tokens{}, service.ErrRefreshTokenExpired)
+			},
+			statusCode:   400,
+			responseBody: `{"message":"refresh token expired"}`,
+		},
+		{
+			name:          "invalid token",
+			authHeader:    "",
+			mockBehaviour: func(s *mockService.MockAuth) {},
+			statusCode:    401,
+			responseBody:  `{"message":"empty auth header"}`,
+		},
+		{
+			name:       "error",
+			authHeader: "Bearer " + token,
+			mockBehaviour: func(s *mockService.MockAuth) {
+				s.EXPECT().Refresh(context.Background(), token).Return(domain.Tokens{}, errors.New("general error"))
+			},
+			statusCode:   500,
+			responseBody: `{"message":"general error"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Init Dependencies
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			auth := mockService.NewMockAuth(c)
+			tt.mockBehaviour(auth)
+
+			services := &service.Services{Auth: auth}
+			handler := &Handler{
+				services: services,
+			}
+
+			// Init Endpoint
+			r := gin.New()
+			r.POST("/refresh", handler.refresh)
+
+			// Create Request
+			w := httptest.NewRecorder()
+			req := httptest.NewRequest("POST", "/refresh", bytes.NewBufferString(""))
+			req.Header.Add("Authorization", tt.authHeader)
 
 			// Make Request
 			r.ServeHTTP(w, req)

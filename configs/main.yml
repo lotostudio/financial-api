@@ -13,7 +13,9 @@ db:
   password: <password>
   ssl-mode: <mode>
 auth:
-  access-token-ttl: 10m
+  access-token-ttl: 15m
+  refresh-token-ttl: 1h
+  refresh-token-length: 0
   password-salt: <salt>
   jwt:
     key: <key>

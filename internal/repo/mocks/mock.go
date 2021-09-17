@@ -110,6 +110,73 @@ func (mr *MockUsersMockRecorder) UpdatePassword(ctx, userID, toUpdate interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePassword", reflect.TypeOf((*MockUsers)(nil).UpdatePassword), ctx, userID, toUpdate)
 }
 
+// MockSessions is a mock of Sessions interface.
+type MockSessions struct {
+	ctrl     *gomock.Controller
+	recorder *MockSessionsMockRecorder
+}
+
+// MockSessionsMockRecorder is the mock recorder for MockSessions.
+type MockSessionsMockRecorder struct {
+	mock *MockSessions
+}
+
+// NewMockSessions creates a new mock instance.
+func NewMockSessions(ctrl *gomock.Controller) *MockSessions {
+	mock := &MockSessions{ctrl: ctrl}
+	mock.recorder = &MockSessionsMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockSessions) EXPECT() *MockSessionsMockRecorder {
+	return m.recorder
+}
+
+// Create mocks base method.
+func (m *MockSessions) Create(ctx context.Context, userID int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", ctx, userID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockSessionsMockRecorder) Create(ctx, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockSessions)(nil).Create), ctx, userID)
+}
+
+// GetByToken mocks base method.
+func (m *MockSessions) GetByToken(ctx context.Context, token string) (domain.Session, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByToken", ctx, token)
+	ret0, _ := ret[0].(domain.Session)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByToken indicates an expected call of GetByToken.
+func (mr *MockSessionsMockRecorder) GetByToken(ctx, token interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByToken", reflect.TypeOf((*MockSessions)(nil).GetByToken), ctx, token)
+}
+
+// Update mocks base method.
+func (m *MockSessions) Update(ctx context.Context, toUpdate domain.SessionToUpdate, id int64) (domain.Session, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", ctx, toUpdate, id)
+	ret0, _ := ret[0].(domain.Session)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Update indicates an expected call of Update.
+func (mr *MockSessionsMockRecorder) Update(ctx, toUpdate, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockSessions)(nil).Update), ctx, toUpdate, id)
+}
+
 // MockCurrencies is a mock of Currencies interface.
 type MockCurrencies struct {
 	ctrl     *gomock.Controller

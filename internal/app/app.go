@@ -67,7 +67,7 @@ func Run(configPath string) {
 
 	// Utils
 	passwordHasher := hash.NewSHA1PasswordHasher(cfg.Auth.PasswordSalt)
-	tokenManager, err := auth.NewJWTManager(cfg.Auth.JWT.Key, cfg.Auth.AccessTokenTTL)
+	tokenManager, err := auth.NewJWTManager(cfg.Auth.JWT.Key, cfg.Auth.AccessTokenTTL, cfg.Auth.RefreshTokenLength)
 
 	if err != nil {
 		log.Error(err)
@@ -76,7 +76,7 @@ func Run(configPath string) {
 
 	// Init handlers
 	repos := repo.NewRepos(db)
-	services := service.NewServices(repos, passwordHasher, tokenManager)
+	services := service.NewServices(repos, passwordHasher, tokenManager, cfg.Auth.AccessTokenTTL, cfg.Auth.RefreshTokenTTL)
 	handlers := handler.NewHandler(services, tokenManager)
 
 	// HTTP Server

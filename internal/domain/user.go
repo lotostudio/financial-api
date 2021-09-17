@@ -39,8 +39,3 @@ type UserToLogin struct {
 	// Secret password
 	Password string `json:"password" binding:"required,alphanum,min=8" example:"qweqweqwe"`
 } // @name UserToLogin
-
-type Tokens struct {
-	// Token used for accessing operations and/or resources
-	AccessToken string `json:"accessToken" binding:"required" example:"access token"`
-} // @name Tokens

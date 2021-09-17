@@ -16,6 +16,12 @@ type Users interface {
 	UpdatePassword(ctx context.Context, userID int64, toUpdate domain.UserToUpdate) (domain.User, error)
 }
 
+type Sessions interface {
+	Create(ctx context.Context, userID int64) error
+	GetByToken(ctx context.Context, token string) (domain.Session, error)
+	Update(ctx context.Context, toUpdate domain.SessionToUpdate, id int64) (domain.Session, error)
+}
+
 type Currencies interface {
 	List(ctx context.Context) ([]domain.Currency, error)
 	Get(ctx context.Context, id int) (domain.Currency, error)
@@ -35,6 +41,7 @@ type AccountTypes interface {
 
 type Repos struct {
 	Users
+	Sessions
 	Currencies
 	Accounts
 	AccountTypes
@@ -43,6 +50,7 @@ type Repos struct {
 func NewRepos(db *sqlx.DB) *Repos {
 	return &Repos{
 		Users:        newUsersRepo(db),
+		Sessions:     newSessionsRepo(db),
 		Currencies:   newCurrenciesRepo(db),
 		Accounts:     newAccountsRepo(db),
 		AccountTypes: newAccountTypesRepo(db),
