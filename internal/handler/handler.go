@@ -10,7 +10,6 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"net/http"
-	"time"
 )
 
 type Handler struct {
@@ -37,14 +36,7 @@ func (h *Handler) Init(cfg *config.Config) *gin.Engine {
 	})
 
 	// Enable CORS
-	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"},
-		AllowMethods:     []string{"POST", "OPTIONS", "GET", "PUT", "DELETE", "PATCH"},
-		AllowHeaders:     []string{"Origin"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	}))
+	router.Use(cors.Default())
 
 	// Init router
 	h.initAPI(router)
