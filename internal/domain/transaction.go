@@ -31,6 +31,7 @@ type TransactionsFilter struct {
 	AccountId   *int64
 	OwnerId     *int64
 	Category    *string
+	Type        *TransactionType
 	CreatedFrom *time.Time
 	CreatedTo   *time.Time
 }

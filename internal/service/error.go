@@ -10,7 +10,7 @@ var (
 
 	ErrRefreshTokenExpired = errors.New("refresh token expired")
 
-  ErrAccountsHaveDifferenceCurrencies = errors.New("accounts have different currencies")
+	ErrAccountsHaveDifferenceCurrencies = errors.New("accounts have different currencies")
 	ErrCreditAccountForbidden           = errors.New("sender account forbidden to access")
 	ErrDebitAccountForbidden            = errors.New("receiver account forbidden to access")
 	ErrNoAccountSelected                = errors.New("no account selected")

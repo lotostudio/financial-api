@@ -44,6 +44,12 @@ func (r *TransactionsRepo) List(ctx context.Context, filter domain.TransactionsF
 		argId++
 	}
 
+	if filter.Type != nil {
+		setValues = append(setValues, fmt.Sprintf("t.type=$%d", argId))
+		args = append(args, *filter.Type)
+		argId++
+	}
+
 	if filter.CreatedFrom != nil && filter.CreatedTo != nil {
 		setValues = append(setValues, fmt.Sprintf("t.created_at BETWEEN $%d AND $%d", argId, argId+1))
 		args = append(args, *filter.CreatedFrom, *filter.CreatedTo)
