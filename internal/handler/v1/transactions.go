@@ -31,7 +31,8 @@ func (h *Handler) initTransactionsRoutes(api *gin.RouterGroup) {
 // @Security UsersAuth
 // @Accept json
 // @Produce json
-// @Param category query string false "Type of category"
+// @Param category query string false "Type of transaction"
+// @Param type query string false "Type of transaction"
 // @Param dateFrom query string false "Start date (yyyy-MM-dd). Combined with dateTo"
 // @Param dateTo query string false "End date (yyyy-MM-dd). Combined with dateFrom"
 // @Success 200 {array} domain.Transaction "Operation finished successfully"
@@ -81,7 +82,8 @@ func (h *Handler) listTransactions(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Id of account"
-// @Param category query string false "Type of category"
+// @Param category query string false "Category of transaction"
+// @Param type query string false "Type of transaction"
 // @Param dateFrom query string false "Start date (yyyy-MM-dd)"
 // @Param dateTo query string false "End date (yyyy-MM-dd)"
 // @Success 200 {array} domain.Transaction "Operation finished successfully"
@@ -166,6 +168,14 @@ func (h *Handler) parseTransactionsFilter(c *gin.Context) (domain.TransactionsFi
 	if category != "" {
 		filter.Category = &category
 	}
+
+	_type := domain.TransactionType(c.Query("type"))
+
+	if err := _type.Validate(); _type != "" && err != nil {
+		return filter, err
+	}
+
+	filter.Type = &_type
 
 	dateFromString := c.Query("dateFrom")
 
