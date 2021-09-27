@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/lotostudio/financial-api/internal/config"
 	"github.com/lotostudio/financial-api/internal/domain"
 	"github.com/lotostudio/financial-api/internal/repo"
 )
@@ -9,12 +10,14 @@ import (
 type AccountsService struct {
 	repo           repo.Accounts
 	currenciesRepo repo.Currencies
+	cfg            config.Account
 }
 
-func newAccountsService(repo repo.Accounts, currenciesRepo repo.Currencies) *AccountsService {
+func newAccountsService(repo repo.Accounts, currenciesRepo repo.Currencies, cfg config.Account) *AccountsService {
 	return &AccountsService{
 		repo:           repo,
 		currenciesRepo: currenciesRepo,
+		cfg:            cfg,
 	}
 }
 
@@ -64,6 +67,32 @@ func (s *AccountsService) Create(ctx context.Context, toCreate domain.AccountToC
 	// Check for required fields of card account
 	if toCreate.Type == domain.Card && toCreate.Number == nil {
 		return domain.Account{}, ErrInvalidCardData
+	}
+
+	// Check for limiting for cash anc card accounts
+	if toCreate.Type == domain.Cash || toCreate.Type == domain.Card {
+		var count int64
+
+		if count, err = s.repo.CountByTypes(ctx, userID, domain.Cash, domain.Card); err != nil {
+			return domain.Account{}, err
+		}
+
+		if uint8(count) >= s.cfg.CardAndCashLimit {
+			return domain.Account{}, ErrAccountCountLimited
+		}
+	}
+
+	// Check for limiting for loan anc deposit accounts
+	if toCreate.Type == domain.Loan || toCreate.Type == domain.Deposit {
+		var count int64
+
+		if count, err = s.repo.CountByTypes(ctx, userID, domain.Loan, domain.Deposit); err != nil {
+			return domain.Account{}, err
+		}
+
+		if uint8(count) >= s.cfg.LoanAndDepositLimit {
+			return domain.Account{}, ErrAccountCountLimited
+		}
 	}
 
 	account, err := s.repo.Create(ctx, toCreate, userID, currencyID)

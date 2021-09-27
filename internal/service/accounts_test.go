@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/golang/mock/gomock"
+	"github.com/lotostudio/financial-api/internal/config"
 	"github.com/lotostudio/financial-api/internal/domain"
 	"github.com/lotostudio/financial-api/internal/repo"
 	mockRepo "github.com/lotostudio/financial-api/internal/repo/mocks"
@@ -24,8 +25,12 @@ func mockAccountsService(t *testing.T) (*AccountsService, *mockRepo.MockAccounts
 
 	aRepo := mockRepo.NewMockAccounts(mockCtl)
 	cRepo := mockRepo.NewMockCurrencies(mockCtl)
+	aCfg := config.Account{
+		CardAndCashLimit:    1,
+		LoanAndDepositLimit: 1,
+	}
 
-	s := newAccountsService(aRepo, cRepo)
+	s := newAccountsService(aRepo, cRepo, aCfg)
 
 	return s, aRepo, cRepo
 }
@@ -93,10 +98,11 @@ func TestAccountsService_Create(t *testing.T) {
 	toCreate := domain.AccountToCreate{
 		Title:   "",
 		Balance: 0,
-		Type:    "",
+		Type:    domain.Cash,
 	}
 
 	cRepo.EXPECT().Get(ctx, 1).Return(domain.Currency{ID: 1, Code: "KZT"}, nil)
+	aRepo.EXPECT().CountByTypes(ctx, userId, domain.Cash, domain.Card).Return(int64(0), nil)
 	aRepo.EXPECT().Create(ctx, toCreate, userId, 1).Return(domain.Account{}, nil)
 
 	account, err := s.Create(ctx, toCreate, userId, 1)
@@ -172,6 +178,46 @@ func TestAccountsService_CreateInvalidCardData(t *testing.T) {
 	require.ErrorIs(t, err, ErrInvalidCardData)
 }
 
+func TestAccountsService_CreateCashCardLimit(t *testing.T) {
+	s, aRepo, cRepo := mockAccountsService(t)
+
+	ctx := context.Background()
+	toCreate := domain.AccountToCreate{
+		Title:   "",
+		Balance: 0,
+		Type:    domain.Cash,
+	}
+
+	cRepo.EXPECT().Get(ctx, 1).Return(domain.Currency{ID: 1, Code: "KZT"}, nil)
+	aRepo.EXPECT().CountByTypes(ctx, userId, domain.Cash, domain.Card).Return(int64(1), nil)
+
+	_, err := s.Create(ctx, toCreate, userId, 1)
+
+	require.ErrorIs(t, err, ErrAccountCountLimited)
+}
+
+func TestAccountsService_CreateLoanDepositLimit(t *testing.T) {
+	s, aRepo, cRepo := mockAccountsService(t)
+
+	ctx := context.Background()
+	var term uint8 = 1
+	var rate float32 = 1.1
+	toCreate := domain.AccountToCreate{
+		Title:   "",
+		Balance: 0,
+		Type:    domain.Loan,
+		Term:    &term,
+		Rate:    &rate,
+	}
+
+	cRepo.EXPECT().Get(ctx, 1).Return(domain.Currency{ID: 1, Code: "KZT"}, nil)
+	aRepo.EXPECT().CountByTypes(ctx, userId, domain.Loan, domain.Deposit).Return(int64(1), nil)
+
+	_, err := s.Create(ctx, toCreate, userId, 1)
+
+	require.ErrorIs(t, err, ErrAccountCountLimited)
+}
+
 func TestAccountsService_CreateGeneralError(t *testing.T) {
 	s, aRepo, cRepo := mockAccountsService(t)
 
@@ -183,6 +229,7 @@ func TestAccountsService_CreateGeneralError(t *testing.T) {
 	}
 
 	cRepo.EXPECT().Get(ctx, 1).Return(domain.Currency{ID: 1, Code: "KZT"}, nil)
+	aRepo.EXPECT().CountByTypes(ctx, userId, domain.Cash, domain.Card).Return(int64(0), nil)
 	aRepo.EXPECT().Create(ctx, toCreate, userId, 1).Return(domain.Account{}, errors.New("general error"))
 
 	_, err := s.Create(ctx, toCreate, userId, 1)

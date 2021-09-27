@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/lotostudio/financial-api/internal/config"
 	"github.com/lotostudio/financial-api/internal/domain"
 	"github.com/lotostudio/financial-api/internal/repo"
 	"github.com/lotostudio/financial-api/pkg/auth"
@@ -68,12 +69,12 @@ type Services struct {
 }
 
 func NewServices(repos *repo.Repos, hasher hash.PasswordHasher, tokenManager auth.TokenManager,
-	accessTokenTTL time.Duration, refreshTokenTTL time.Duration) *Services {
+	accessTokenTTL time.Duration, refreshTokenTTL time.Duration, accCfg config.Account) *Services {
 	return &Services{
 		Users:                 newUsersService(repos.Users, hasher),
 		Auth:                  newAuthService(repos.Users, repos.Sessions, hasher, tokenManager, accessTokenTTL, refreshTokenTTL),
 		Currencies:            newCurrenciesService(repos.Currencies),
-		Accounts:              newAccountsService(repos.Accounts, repos.Currencies),
+		Accounts:              newAccountsService(repos.Accounts, repos.Currencies, accCfg),
 		AccountTypes:          newAccountTypesService(repos.AccountTypes),
 		Transactions:          newTransactionsService(repos.Transactions, repos.Accounts, repos.TransactionCategories),
 		TransactionCategories: newTransactionCategoriesService(repos.TransactionCategories),

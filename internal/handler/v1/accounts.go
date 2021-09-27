@@ -160,7 +160,7 @@ func (h *Handler) createAccount(c *gin.Context) {
 			return
 		}
 
-		if err == service.ErrInvalidLoanData || err == service.ErrInvalidDepositData {
+		if err == service.ErrInvalidLoanData || err == service.ErrInvalidDepositData || err == service.ErrAccountCountLimited {
 			newResponse(c, http.StatusBadRequest, err.Error())
 			return
 		}

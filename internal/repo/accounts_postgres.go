@@ -35,6 +35,33 @@ func (r *AccountsRepo) List(ctx context.Context, userID int64) ([]domain.Account
 	return accounts, nil
 }
 
+func (r *AccountsRepo) CountByTypes(ctx context.Context, userID int64, _type domain.AccountType, types ...domain.AccountType) (int64, error) {
+	aTypes := make([]domain.AccountType, 0, 1+len(types))
+	aTypes = append(aTypes, _type)
+	aTypes = append(aTypes, types...)
+
+	// for binding arrays use ? and In function
+	// then change ? to $ with Rebind function
+	query, args, err := sqlx.In(`
+	SELECT count(*)
+	FROM accounts a
+	WHERE a.owner_id = ? AND a.type IN (?)`, userID, aTypes)
+
+	if err != nil {
+		return 0, err
+	}
+
+	query = r.db.Rebind(query)
+
+	var count int64
+
+	if err = r.db.QueryRowContext(ctx, query, args...).Scan(&count); err != nil {
+		return count, err
+	}
+
+	return count, nil
+}
+
 func (r *AccountsRepo) Create(ctx context.Context, toCreate domain.AccountToCreate, userID int64, currencyID int) (domain.Account, error) {
 	tx, err := r.db.Begin()
 
