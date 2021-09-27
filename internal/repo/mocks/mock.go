@@ -253,6 +253,26 @@ func (m *MockAccounts) EXPECT() *MockAccountsMockRecorder {
 	return m.recorder
 }
 
+// CountByTypes mocks base method.
+func (m *MockAccounts) CountByTypes(ctx context.Context, userID int64, _type domain.AccountType, types ...domain.AccountType) (int64, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, userID, _type}
+	for _, a := range types {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CountByTypes", varargs...)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CountByTypes indicates an expected call of CountByTypes.
+func (mr *MockAccountsMockRecorder) CountByTypes(ctx, userID, _type interface{}, types ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, userID, _type}, types...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountByTypes", reflect.TypeOf((*MockAccounts)(nil).CountByTypes), varargs...)
+}
+
 // Create mocks base method.
 func (m *MockAccounts) Create(ctx context.Context, toCreate domain.AccountToCreate, userID int64, currencyID int) (domain.Account, error) {
 	m.ctrl.T.Helper()

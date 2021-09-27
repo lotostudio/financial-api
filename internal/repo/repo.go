@@ -29,6 +29,7 @@ type Currencies interface {
 
 type Accounts interface {
 	List(ctx context.Context, userID int64) ([]domain.Account, error)
+	CountByTypes(ctx context.Context, userID int64, _type domain.AccountType, types ...domain.AccountType) (int64, error)
 	Create(ctx context.Context, toCreate domain.AccountToCreate, userID int64, currencyID int) (domain.Account, error)
 	Get(ctx context.Context, id int64) (domain.Account, error)
 	Update(ctx context.Context, toUpdate domain.AccountToUpdate, id int64, _type domain.AccountType) (domain.Account, error)

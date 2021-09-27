@@ -43,6 +43,13 @@ type Config struct {
 			Key string `yaml:"key" envconfig:"AUTH_JWT_KEY"`
 		} `yaml:"jwt"`
 	} `yaml:"auth"`
+
+	Account Account `yaml:"account"`
+}
+
+type Account struct {
+	CardAndCashLimit    uint8 `yaml:"card-cash-limit" envconfig:"ACCOUNT_CARD_CASH_LIMIT"`
+	LoanAndDepositLimit uint8 `yaml:"loan-deposit-limit" envconfig:"ACCOUNT_LOAN_DEPOSIT_LIMIT"`
 }
 
 func LoadConfig(configPath string) *Config {

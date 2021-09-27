@@ -76,7 +76,7 @@ func Run(configPath string) {
 
 	// Init handlers
 	repos := repo.NewRepos(db)
-	services := service.NewServices(repos, passwordHasher, tokenManager, cfg.Auth.AccessTokenTTL, cfg.Auth.RefreshTokenTTL)
+	services := service.NewServices(repos, passwordHasher, tokenManager, cfg.Auth.AccessTokenTTL, cfg.Auth.RefreshTokenTTL, cfg.Account)
 	handlers := handler.NewHandler(services, tokenManager)
 
 	// HTTP Server

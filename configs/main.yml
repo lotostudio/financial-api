@@ -19,3 +19,6 @@ auth:
   password-salt: <salt>
   jwt:
     key: <key>
+account:
+  card-cash-limit: 0
+  loan-deposit-limit: 0
