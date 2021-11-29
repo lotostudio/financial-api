@@ -36,14 +36,18 @@ func (r *SessionsRepo) GetByToken(ctx context.Context, token string) (domain.Ses
 	return item, nil
 }
 
-func (r *SessionsRepo) Update(ctx context.Context, toUpdate domain.SessionToUpdate, id int64) (domain.Session, error) {
+func (r *SessionsRepo) Update(ctx context.Context, toUpdate domain.SessionToUpdate, userID int64) (domain.Session, error) {
 	var session domain.Session
 
 	err := r.db.GetContext(ctx, &session,
-		"UPDATE sessions s SET refresh_token = $1, expires_at = $2 WHERE s.id =$3 RETURNING *",
-		toUpdate.RefreshToken, toUpdate.ExpiresAt, id)
+		"UPDATE sessions s SET refresh_token = $1, expires_at = $2 WHERE s.user_id =$3 RETURNING *",
+		toUpdate.RefreshToken, toUpdate.ExpiresAt, userID)
 
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return session, ErrSessionNotFound
+		}
+
 		return session, err
 	}
 

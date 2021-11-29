@@ -19,7 +19,7 @@ type Users interface {
 type Sessions interface {
 	Create(ctx context.Context, userID int64) error
 	GetByToken(ctx context.Context, token string) (domain.Session, error)
-	Update(ctx context.Context, toUpdate domain.SessionToUpdate, id int64) (domain.Session, error)
+	Update(ctx context.Context, toUpdate domain.SessionToUpdate, userID int64) (domain.Session, error)
 }
 
 type Currencies interface {
