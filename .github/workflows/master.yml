@@ -1,9 +1,9 @@
-name: develop
+name: master
 
 on:
-  push:
-    branches:
-      - develop
+  release:
+    types:
+      - created
 
 jobs:
   lint:
@@ -105,7 +105,7 @@ jobs:
         run: chmod +x app
 
       - name: Build Docker Image
-        run: docker build -f build/Dockerfile -t ghcr.io/lotostudio/financial-api:develop .
+        run: docker build -f build/Dockerfile -t ghcr.io/lotostudio/financial-api:master .
 
       - name: Login
         run: echo $TOKEN | docker login ghcr.io -u $USER --password-stdin
@@ -114,12 +114,12 @@ jobs:
           TOKEN: ${{ secrets.TOKEN }}
 
       - name: Push Docker Image
-        run: docker push ghcr.io/lotostudio/financial-api:develop
+        run: docker push ghcr.io/lotostudio/financial-api:master
 
   deploy:
     runs-on: ubuntu-latest
     needs: docker
-    environment: dev
+    environment: prod
 
     steps:
       - name: Run Deploy Script
@@ -127,5 +127,5 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.PRIVATE_KEY }}
-          script: ./deploy_financial_api_dev.sh
+          password: ${{ secrets.PASSWORD }}
+          script: ./deploy_financial_api_prod.sh
