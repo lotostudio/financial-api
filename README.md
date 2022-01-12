@@ -1,4 +1,4 @@
-# financial-api ![develop](https://github.com/lotostudio/financial-api/actions/workflows/develop.yml/badge.svg)
+# financial-api ![master](https://github.com/lotostudio/financial-api/actions/workflows/master.yml/badge.svg)
 
 Backend service for financial application
 
