@@ -16,6 +16,6 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
 	github.com/swaggo/gin-swagger v1.3.1
-	github.com/swaggo/swag v1.7.3
+	github.com/swaggo/swag v1.7.8
 	gopkg.in/yaml.v2 v2.4.0
 )

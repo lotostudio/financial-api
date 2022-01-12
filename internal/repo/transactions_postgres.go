@@ -165,17 +165,28 @@ func (r *TransactionsRepo) Create(ctx context.Context, toCreate domain.Transacti
 				return transaction, err
 			}
 
-			return domain.Transaction{}, ErrAccountNotEnoughBalance
+			return transaction, ErrAccountNotEnoughBalance
+		}
+
+		if err := updateBalance(ctx, tx, *creditId, balance); err != nil {
+			return transaction, err
 		}
 	}
 
 	if toCreate.Type == domain.Income || toCreate.Type == domain.Transfer {
-		if _, err = tx.ExecContext(ctx, "UPDATE accounts SET balance = balance + $1 WHERE id = $2",
-			transaction.Amount, debitId); err != nil {
+		row = tx.QueryRowContext(ctx, "UPDATE accounts SET balance = balance + $1 WHERE id = $2 RETURNING balance",
+			transaction.Amount, debitId)
+		var balance float64
+
+		if err = row.Scan(&balance); err != nil {
 			if err := tx.Rollback(); err != nil {
 				return transaction, err
 			}
 
+			return transaction, err
+		}
+
+		if err := updateBalance(ctx, tx, *debitId, balance); err != nil {
 			return transaction, err
 		}
 	}
@@ -223,13 +234,13 @@ func (r *TransactionsRepo) Delete(ctx context.Context, id int64) error {
 		return err
 	}
 
-	var creditAccId, debitAccId *int64
+	var creditId, debitId *int64
 	var amount float64
 
 	row := tx.QueryRowContext(ctx,
 		"DELETE FROM transactions t WHERE t.id = $1 RETURNING t.credit_id, t.debit_id, t.amount", id)
 
-	if err = row.Scan(&creditAccId, &debitAccId, &amount); err != nil {
+	if err = row.Scan(&creditId, &debitId, &amount); err != nil {
 		if err := tx.Rollback(); err != nil {
 			return err
 		}
@@ -237,20 +248,27 @@ func (r *TransactionsRepo) Delete(ctx context.Context, id int64) error {
 		return err
 	}
 
-	if creditAccId != nil {
-		if _, err = tx.ExecContext(ctx,
-			"UPDATE accounts SET balance = balance + $1 WHERE id = $2", amount, creditAccId); err != nil {
+	if creditId != nil {
+		row = tx.QueryRowContext(ctx,
+			"UPDATE accounts SET balance = balance + $1 WHERE id = $2 RETURNING balance", amount, creditId)
+		var balance float64
+
+		if err = row.Scan(&balance); err != nil {
 			if err := tx.Rollback(); err != nil {
 				return err
 			}
 
 			return err
 		}
+
+		if err := updateBalance(ctx, tx, *creditId, balance); err != nil {
+			return err
+		}
 	}
 
-	if debitAccId != nil {
+	if debitId != nil {
 		row = tx.QueryRowContext(ctx,
-			"UPDATE accounts SET balance = balance - $1 WHERE id = $2 RETURNING balance", amount, debitAccId)
+			"UPDATE accounts SET balance = balance - $1 WHERE id = $2 RETURNING balance", amount, debitId)
 		var balance float64
 
 		if err = row.Scan(&balance); err != nil {
@@ -267,6 +285,10 @@ func (r *TransactionsRepo) Delete(ctx context.Context, id int64) error {
 			}
 
 			return ErrAccountNotEnoughBalance
+		}
+
+		if err := updateBalance(ctx, tx, *debitId, balance); err != nil {
+			return err
 		}
 	}
 
