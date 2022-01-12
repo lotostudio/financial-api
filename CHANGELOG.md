@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Added
+- Saving balances each day.
 
 ## [1.0.0] - 2021-12-18
 ### Added
