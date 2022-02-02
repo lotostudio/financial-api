@@ -15,4 +15,6 @@ var (
 
 	ErrAccountNotFound         = errors.New("account doesn't exists")
 	ErrAccountNotEnoughBalance = errors.New("account doesn't have enough balance")
+
+	ErrBalanceNotFound = errors.New("balance doesn't exists")
 )

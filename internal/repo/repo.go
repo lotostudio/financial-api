@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/jmoiron/sqlx"
 	"github.com/lotostudio/financial-api/internal/domain"
+	"time"
 )
 
 //go:generate mockgen -source=repo.go -destination=mocks/mock.go
@@ -58,6 +59,10 @@ type TransactionTypes interface {
 	List(ctx context.Context) ([]domain.TransactionType, error)
 }
 
+type Balances interface {
+	Get(ctx context.Context, accountID int64, date time.Time) (domain.Balance, error)
+}
+
 type Repos struct {
 	Users
 	Sessions
@@ -67,6 +72,7 @@ type Repos struct {
 	Transactions
 	TransactionCategories
 	TransactionTypes
+	Balances
 }
 
 func NewRepos(db *sqlx.DB) *Repos {
@@ -79,5 +85,6 @@ func NewRepos(db *sqlx.DB) *Repos {
 		Transactions:          newTransactionsRepo(db),
 		TransactionCategories: newTransactionCategoriesRepo(db),
 		TransactionTypes:      newTransactionTypesRepo(db),
+		Balances:              newBalancesRepo(db),
 	}
 }

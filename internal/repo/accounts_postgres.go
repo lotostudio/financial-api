@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"github.com/jmoiron/sqlx"
 	"github.com/lotostudio/financial-api/internal/domain"
-	"time"
 )
 
 type AccountsRepo struct {
@@ -223,22 +222,4 @@ func (r *AccountsRepo) Delete(ctx context.Context, id int64) error {
 	_, err := r.db.ExecContext(ctx, "DELETE FROM accounts WHERE id = $1", id)
 
 	return err
-}
-
-// updateBalance actualize account balance into balances table with recent value
-func updateBalance(ctx context.Context, tx *sql.Tx, id int64, balance float64) error {
-	// update new entry in balances table for today
-	if _, err := tx.ExecContext(ctx,
-		`INSERT INTO balances(account_id, date, value) VALUES ($1, $2, $3) 
-				ON CONFLICT (account_id, date) DO UPDATE SET value = excluded.value`,
-		id, time.Now(), balance); err != nil {
-
-		if err := tx.Rollback(); err != nil {
-			return err
-		}
-
-		return err
-	}
-
-	return nil
 }
