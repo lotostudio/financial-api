@@ -468,6 +468,21 @@ func (mr *MockTransactionsMockRecorder) List(ctx, filter interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockTransactions)(nil).List), ctx, filter)
 }
 
+// Stats mocks base method.
+func (m *MockTransactions) Stats(ctx context.Context, filter domain.TransactionsFilter) ([]domain.TransactionStat, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Stats", ctx, filter)
+	ret0, _ := ret[0].([]domain.TransactionStat)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Stats indicates an expected call of Stats.
+func (mr *MockTransactionsMockRecorder) Stats(ctx, filter interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Stats", reflect.TypeOf((*MockTransactions)(nil).Stats), ctx, filter)
+}
+
 // MockTransactionCategories is a mock of TransactionCategories interface.
 type MockTransactionCategories struct {
 	ctrl     *gomock.Controller

@@ -39,6 +39,20 @@ func TestTransactionsService_List(t *testing.T) {
 	require.IsType(t, []domain.Transaction{}, categories)
 }
 
+func TestTransactionsService_Stats(t *testing.T) {
+	s, tRepo, _, _ := mockTransactionsService(t)
+
+	ctx := context.Background()
+	filter := domain.TransactionsFilter{}
+
+	tRepo.EXPECT().Stats(ctx, filter).Return([]domain.TransactionStat{}, nil)
+
+	stats, err := s.Stats(ctx, filter)
+
+	require.NoError(t, err)
+	require.IsType(t, []domain.TransactionStat{}, stats)
+}
+
 func TestTransactionsService_CreateIncome(t *testing.T) {
 	s, tRepo, aRepo, tcRepo := mockTransactionsService(t)
 

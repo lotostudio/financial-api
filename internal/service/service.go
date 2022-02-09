@@ -43,6 +43,7 @@ type AccountTypes interface {
 
 type Transactions interface {
 	List(ctx context.Context, filter domain.TransactionsFilter) ([]domain.Transaction, error)
+	Stats(ctx context.Context, filter domain.TransactionsFilter) ([]domain.TransactionStat, error)
 	Create(ctx context.Context, toCreate domain.TransactionToCreate, userID int64, categoryId *int64, creditId *int64,
 		debitId *int64) (domain.Transaction, error)
 	Delete(ctx context.Context, id int64, userID int64) error

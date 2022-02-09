@@ -24,6 +24,10 @@ func (s *TransactionsService) List(ctx context.Context, filter domain.Transactio
 	return s.repo.List(ctx, filter)
 }
 
+func (s *TransactionsService) Stats(ctx context.Context, filter domain.TransactionsFilter) ([]domain.TransactionStat, error) {
+	return s.repo.Stats(ctx, filter)
+}
+
 func (s *TransactionsService) Create(ctx context.Context, toCreate domain.TransactionToCreate, userID int64,
 	categoryId *int64, creditId *int64, debitId *int64) (domain.Transaction, error) {
 

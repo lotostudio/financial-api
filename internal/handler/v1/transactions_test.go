@@ -99,6 +99,84 @@ func TestHandler_listTransactions(t *testing.T) {
 	}
 }
 
+func TestHandler_transactionStats(t *testing.T) {
+	type mockBehaviour func(s *mockService.MockTransactions)
+
+	stats := []domain.TransactionStat{
+		{
+			Category: "food",
+			Value:    123,
+		},
+		{
+			Category: "family",
+			Value:    1000,
+		},
+	}
+
+	setResponseBody := func(stats []domain.TransactionStat) string {
+		body, _ := json.Marshal(stats)
+
+		return string(body)
+	}
+
+	tests := []struct {
+		name                 string
+		mockBehaviour        mockBehaviour
+		expectedCodeStatus   int
+		expectedResponseBody string
+	}{
+		{
+			name: "ok",
+			mockBehaviour: func(s *mockService.MockTransactions) {
+				s.EXPECT().Stats(context.Background(), gomock.Any()).Return(stats, nil)
+			},
+			expectedCodeStatus:   200,
+			expectedResponseBody: setResponseBody(stats),
+		},
+		{
+			name: "error",
+			mockBehaviour: func(s *mockService.MockTransactions) {
+				s.EXPECT().Stats(context.Background(), gomock.Any()).Return(stats, errors.New("general error"))
+			},
+			expectedCodeStatus:   500,
+			expectedResponseBody: `{"message":"general error"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Init Dependencies
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			tService := mockService.NewMockTransactions(c)
+			tt.mockBehaviour(tService)
+
+			services := &service.Services{Transactions: tService}
+			handler := &Handler{
+				services: services,
+			}
+
+			// Init Endpoint
+			r := gin.New()
+			r.GET("/transactions/stats", func(c *gin.Context) {
+				c.Set(userCtx, strconv.FormatInt(userID, 10))
+			}, handler.transactionStats)
+
+			// Create Request
+			w := httptest.NewRecorder()
+			req := httptest.NewRequest("GET", "/transactions/stats", bytes.NewBufferString(""))
+
+			// Make Request
+			r.ServeHTTP(w, req)
+
+			// Assert
+			assert.Equal(t, tt.expectedCodeStatus, w.Code)
+			assert.Equal(t, tt.expectedResponseBody, w.Body.String())
+		})
+	}
+}
+
 func TestHandler_listTransactionsOfAccount(t *testing.T) {
 	type mockBehaviour func(s *mockService.MockTransactions, a *mockService.MockAccounts)
 
