@@ -3,7 +3,7 @@
 .DEFAULT_GOAL := build
 
 swag:
-	go get github.com/swaggo/swag/cmd/swag
+	go install github.com/swaggo/swag/cmd/swag
 	swag init -g internal/app/app.go
 
 lint:
