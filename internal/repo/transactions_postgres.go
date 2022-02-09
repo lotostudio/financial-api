@@ -123,6 +123,81 @@ func (r *TransactionsRepo) List(ctx context.Context, filter domain.TransactionsF
 	return transactions, nil
 }
 
+func (r *TransactionsRepo) Stats(ctx context.Context, filter domain.TransactionsFilter) ([]domain.TransactionStat, error) {
+	setValues := make([]string, 0)
+	args := make([]interface{}, 0)
+	var argId = 1
+
+	setValues = append(setValues, "1 = 1")
+
+	if filter.OwnerId != nil {
+		setValues = append(setValues, fmt.Sprintf("(cr.owner_id = $%d OR db.owner_id = $%d)", argId, argId))
+		args = append(args, *filter.OwnerId)
+		argId++
+	}
+
+	if filter.AccountId != nil {
+		setValues = append(setValues, fmt.Sprintf("(cr.id=$%d OR db.id=$%d)", argId, argId))
+		args = append(args, *filter.AccountId)
+		argId++
+	}
+
+	if filter.Category != nil {
+		setValues = append(setValues, fmt.Sprintf("tc.title=$%d", argId))
+		args = append(args, *filter.Category)
+		argId++
+	}
+
+	if filter.Type != nil {
+		setValues = append(setValues, fmt.Sprintf("t.type=$%d", argId))
+		args = append(args, *filter.Type)
+		argId++
+	}
+
+	if filter.CreatedFrom != nil && filter.CreatedTo != nil {
+		setValues = append(setValues, fmt.Sprintf("t.created_at BETWEEN $%d AND $%d", argId, argId+1))
+		args = append(args, *filter.CreatedFrom, *filter.CreatedTo)
+
+		// last argId increasing must be marked as nolint
+		argId = argId + 2 //nolint
+	}
+
+	// Create WHERE statement variables with separated by ANDs
+	setQuery := strings.Join(setValues, " AND ")
+	query := fmt.Sprintf(`
+	SELECT coalesce(tc.title, 'transfer') AS category, sum(t.amount) AS value
+	FROM transactions t
+	LEFT JOIN transaction_categories tc ON t.category_id = tc.id
+	LEFT JOIN accounts cr ON t.credit_id = cr.id
+	LEFT JOIN currencies cr_c ON cr.currency_id = cr_c.id
+	LEFT JOIN accounts db ON t.debit_id = db.id
+	LEFT JOIN currencies db_c ON db.currency_id = db_c.id
+	WHERE %s
+	GROUP BY tc.title`, setQuery)
+
+	fmt.Println(query)
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	stats := make([]domain.TransactionStat, 0)
+
+	for rows.Next() {
+		st := domain.TransactionStat{}
+
+		if err = rows.Scan(&st.Category, &st.Value); err != nil {
+			return nil, err
+		}
+
+		stats = append(stats, st)
+	}
+
+	return stats, nil
+}
+
 func (r *TransactionsRepo) Create(ctx context.Context, toCreate domain.TransactionToCreate, categoryId *int64,
 	creditId *int64, debitId *int64) (domain.Transaction, error) {
 	tx, err := r.db.Begin()

@@ -49,3 +49,8 @@ func (t TransactionType) Validate() error {
 
 	return nil
 }
+
+type TransactionStat struct {
+	Category string `json:"category" binding:"required" db:"category" example:"food"`
+	Value    int64  `json:"value" binding:"required" db:"value" example:"12"`
+}

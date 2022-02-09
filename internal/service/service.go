@@ -43,6 +43,7 @@ type AccountTypes interface {
 
 type Transactions interface {
 	List(ctx context.Context, filter domain.TransactionsFilter) ([]domain.Transaction, error)
+	Stats(ctx context.Context, filter domain.TransactionsFilter) ([]domain.TransactionStat, error)
 	Create(ctx context.Context, toCreate domain.TransactionToCreate, userID int64, categoryId *int64, creditId *int64,
 		debitId *int64) (domain.Transaction, error)
 	Delete(ctx context.Context, id int64, userID int64) error
@@ -57,6 +58,10 @@ type TransactionTypes interface {
 	List(ctx context.Context) ([]domain.TransactionType, error)
 }
 
+type Stats interface {
+	Statement(ctx context.Context, filter domain.TransactionsFilter) (domain.Statement, error)
+}
+
 type Services struct {
 	Users
 	Auth
@@ -66,6 +71,7 @@ type Services struct {
 	Transactions
 	TransactionCategories
 	TransactionTypes
+	Stats
 }
 
 func NewServices(repos *repo.Repos, hasher hash.PasswordHasher, tokenManager auth.TokenManager,
@@ -79,5 +85,6 @@ func NewServices(repos *repo.Repos, hasher hash.PasswordHasher, tokenManager aut
 		Transactions:          newTransactionsService(repos.Transactions, repos.Accounts, repos.TransactionCategories),
 		TransactionCategories: newTransactionCategoriesService(repos.TransactionCategories),
 		TransactionTypes:      newTransactionTypesService(repos.TransactionTypes),
+		Stats:                 newStatsService(repos.Accounts, repos.Balances, repos.Transactions),
 	}
 }

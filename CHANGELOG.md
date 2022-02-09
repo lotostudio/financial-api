@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Added
+- Statement.
+- Grouped transaction sums by categories.
+
+### Changed
+- go version to 1.17.6
 
 ## [1.0.1] - 2022-01-12
 ### Added

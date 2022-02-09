@@ -21,6 +21,11 @@ func (h *Handler) initTransactionsRoutes(api *gin.RouterGroup) {
 		transactions.GET("", h.listTransactions)
 		transactions.POST("", h.createTransaction)
 		transactions.DELETE("/:id", h.deleteTransaction)
+
+		stats := transactions.Group("/stats")
+		{
+			stats.GET("", h.transactionStats)
+		}
 	}
 }
 
@@ -72,6 +77,56 @@ func (h *Handler) listTransactions(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, transactions)
+}
+
+// @Summary Transaction stats
+// @Tags transactions
+// @Description Transaction stats
+// @ID transactionStats
+// @Security UsersAuth
+// @Accept json
+// @Produce json
+// @Param category query string false "Type of transaction"
+// @Param type query string false "Type of transaction"
+// @Param dateFrom query string false "Start date (yyyy-MM-dd). Combined with dateTo"
+// @Param dateTo query string false "End date (yyyy-MM-dd). Combined with dateFrom"
+// @Success 200 {array} domain.TransactionStat "Operation finished successfully"
+// @Failure 400 {object} response "Invalid request"
+// @Failure 401 {object} response "Invalid authorization"
+// @Failure 500 {object} response "Server error"
+// @Router /transactions/stats [get]
+func (h *Handler) transactionStats(c *gin.Context) {
+	filter, err := h.parseTransactionsFilter(c)
+
+	if err != nil {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	userIdString, ok := c.Get("userId")
+
+	if !ok {
+		newResponse(c, http.StatusInternalServerError, "user not found")
+		return
+	}
+
+	userId, err := strconv.ParseInt(userIdString.(string), 10, 64)
+
+	if err != nil {
+		newResponse(c, http.StatusInternalServerError, "user not found")
+		return
+	}
+
+	filter.OwnerId = &userId
+
+	stats, err := h.services.Transactions.Stats(c.Request.Context(), filter)
+
+	if err != nil {
+		newResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, stats)
 }
 
 // @Summary List transactions of account
