@@ -1,5 +1,4 @@
 .PHONY:
-.SILENT:
 .DEFAULT_GOAL := build
 
 swag:
