@@ -7,7 +7,7 @@
 # docker run -p 8080:8080 ghcr.io/lotostudio/financial-api:latest
 #
 # Build binary in separate docker container with golang
-FROM golang:1.15-alpine3.12 AS builder
+FROM golang:1.17.6-alpine3.15 AS builder
 
 RUN go version
 
