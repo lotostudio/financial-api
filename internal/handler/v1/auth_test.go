@@ -97,7 +97,7 @@ func TestHandler_register(t *testing.T) {
 
 			services := &service.Services{Auth: auth}
 			handler := &Handler{
-				services: services,
+				s: services,
 			}
 
 			// Init Endpoint
@@ -191,7 +191,7 @@ func TestHandler_login(t *testing.T) {
 
 			services := &service.Services{Auth: auth}
 			handler := &Handler{
-				services: services,
+				s: services,
 			}
 
 			// Init Endpoint
@@ -274,7 +274,7 @@ func TestHandler_refresh(t *testing.T) {
 
 			services := &service.Services{Auth: auth}
 			handler := &Handler{
-				services: services,
+				s: services,
 			}
 
 			// Init Endpoint

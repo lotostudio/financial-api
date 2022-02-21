@@ -22,7 +22,7 @@ import (
 )
 
 // @title Financial API
-// @version 1.0.0
+// @version 1.0.2
 // @description API for personal financing
 
 // @host localhost:8080
@@ -60,7 +60,7 @@ func Run(configPath string) {
 		return
 	}
 
-	if err = m.Up(); err != nil && err != migrate.ErrNoChange {
+	if err = m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		log.Error(err)
 		return
 	}

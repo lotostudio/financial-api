@@ -61,7 +61,7 @@ func TestHandler_listUsers(t *testing.T) {
 
 			services := &service.Services{Users: userService}
 			handler := &Handler{
-				services: services,
+				s: services,
 			}
 
 			// Init Endpoint
@@ -128,7 +128,7 @@ func TestHandler_getMe(t *testing.T) {
 
 			services := &service.Services{Users: userService}
 			handler := &Handler{
-				services: services,
+				s: services,
 			}
 
 			// Init Endpoint
@@ -216,7 +216,7 @@ func TestHandler_partialUpdateMe(t *testing.T) {
 
 			services := &service.Services{Users: userService}
 			handler := &Handler{
-				services: services,
+				s: services,
 			}
 
 			// Init Endpoint

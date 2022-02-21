@@ -7,14 +7,14 @@ import (
 )
 
 type Handler struct {
-	services     *service.Services
-	tokenManager auth.TokenManager
+	s   *service.Services
+	tkn auth.TokenManager
 }
 
 func NewHandler(services *service.Services, tokenManager auth.TokenManager) *Handler {
 	return &Handler{
-		services:     services,
-		tokenManager: tokenManager,
+		s:   services,
+		tkn: tokenManager,
 	}
 }
 
@@ -23,11 +23,7 @@ func (h *Handler) Init(api *gin.RouterGroup) {
 	{
 		h.initUsersRoutes(v1)
 		h.initAuthRoutes(v1)
-		h.initCurrenciesRoutes(v1)
 		h.initAccountsRoutes(v1)
-		h.initAccountTypesRoutes(v1)
 		h.initTransactionsRoutes(v1)
-		h.initTransactionCategoriesRoutes(v1)
-		h.initTransactionTypesRoutes(v1)
 	}
 }

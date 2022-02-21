@@ -2,6 +2,8 @@ package domain
 
 import "time"
 
+type AccountType string // @name AccountType
+
 // Account types
 const (
 	Cash    = AccountType("cash")
@@ -75,6 +77,17 @@ type AccountToUpdate struct {
 	Rate *float32 `json:"rate" binding:"omitempty,gt=0" example:"10.8"`
 } // @name AccountToUpdate
 
-type AccountType string // @name AccountType
-
 type GroupedAccounts map[AccountType][]Account // @name GroupedAccounts
+
+type Balance struct {
+	AccountID int64 `json:"-" db:"account_id" swaggerignore:"true"`
+	// Date of balance
+	Date time.Time `json:"date" binding:"required" db:"date" format:"yyyy-MM-ddThh:mm:ss.ZZZ" example:"2022-01-15T00:00:00Z"`
+	// Amount of balance
+	Value int64 `json:"value" binding:"required" db:"value" example:"123002.12"`
+} // @name Balance
+
+type Currency struct {
+	ID   int    `json:"id" binding:"required" db:"id" example:"1"`
+	Code string `json:"code" binding:"required,max=10" maxLength:"10" db:"code" example:"KZT"`
+} // @name Currency

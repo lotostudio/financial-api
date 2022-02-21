@@ -82,7 +82,7 @@ func TestHandler_getStatement(t *testing.T) {
 
 			services := &service.Services{Stats: tService, Accounts: aService}
 			handler := &Handler{
-				services: services,
+				s: services,
 			}
 
 			// Init Endpoint

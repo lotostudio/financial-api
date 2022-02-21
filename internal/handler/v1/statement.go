@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/lotostudio/financial-api/internal/repo"
 	"github.com/lotostudio/financial-api/internal/service"
@@ -65,24 +66,24 @@ func (h *Handler) getStatement(c *gin.Context) {
 
 	filter.AccountId = &accountId
 
-	_, err = h.services.Accounts.Get(c.Request.Context(), accountId, userId)
+	_, err = h.s.Accounts.Get(c.Request.Context(), accountId, userId)
+
+	if errors.Is(err, service.ErrAccountForbidden) {
+		newResponse(c, http.StatusForbidden, err.Error())
+		return
+	}
+
+	if errors.Is(err, repo.ErrAccountNotFound) {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	if err != nil {
-		if err == service.ErrAccountForbidden {
-			newResponse(c, http.StatusForbidden, err.Error())
-			return
-		}
-
-		if err == repo.ErrAccountNotFound {
-			newResponse(c, http.StatusBadRequest, err.Error())
-			return
-		}
-
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	stat, err := h.services.Stats.Statement(c.Request.Context(), filter)
+	stat, err := h.s.Stats.Statement(c.Request.Context(), filter)
 
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())

@@ -24,7 +24,7 @@ func NewHandler(services *service.Services, tokenManager auth.TokenManager) *Han
 	}
 }
 
-func (h *Handler) Init(cfg *config.Config) *gin.Engine {
+func (h *Handler) Init(_ *config.Config) *gin.Engine {
 	// Init gin handler
 	router := gin.Default()
 

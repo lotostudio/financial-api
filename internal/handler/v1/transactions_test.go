@@ -76,7 +76,7 @@ func TestHandler_listTransactions(t *testing.T) {
 
 			services := &service.Services{Transactions: tService}
 			handler := &Handler{
-				services: services,
+				s: services,
 			}
 
 			// Init Endpoint
@@ -154,7 +154,7 @@ func TestHandler_transactionStats(t *testing.T) {
 
 			services := &service.Services{Transactions: tService}
 			handler := &Handler{
-				services: services,
+				s: services,
 			}
 
 			// Init Endpoint
@@ -257,7 +257,7 @@ func TestHandler_listTransactionsOfAccount(t *testing.T) {
 
 			services := &service.Services{Transactions: tService, Accounts: aService}
 			handler := &Handler{
-				services: services,
+				s: services,
 			}
 
 			// Init Endpoint
@@ -428,7 +428,7 @@ func TestHandler_createTransaction(t *testing.T) {
 
 			services := &service.Services{Transactions: tService}
 			handler := &Handler{
-				services: services,
+				s: services,
 			}
 
 			// Init Endpoint
@@ -519,7 +519,7 @@ func TestHandler_deleteTransaction(t *testing.T) {
 
 			services := &service.Services{Transactions: tService}
 			handler := &Handler{
-				services: services,
+				s: services,
 			}
 
 			// Init Endpoint
@@ -531,6 +531,185 @@ func TestHandler_deleteTransaction(t *testing.T) {
 			// Create Request
 			w := httptest.NewRecorder()
 			req := httptest.NewRequest("DELETE", fmt.Sprintf("/transactions/%d", transactionID), bytes.NewBufferString(""))
+
+			// Make Request
+			r.ServeHTTP(w, req)
+
+			// Assert
+			assert.Equal(t, tt.expectedCodeStatus, w.Code)
+			assert.Equal(t, tt.expectedResponseBody, w.Body.String())
+		})
+	}
+}
+
+func TestHandler_listTransactionCategories(t *testing.T) {
+	type mockBehaviour func(s *mockService.MockTransactionCategories)
+
+	categories := []domain.TransactionCategory{
+		{
+			ID:    1,
+			Title: "food",
+			Type:  domain.Expense,
+		},
+	}
+
+	setResponseBody := func(categories []domain.TransactionCategory) string {
+		body, _ := json.Marshal(categories)
+
+		return string(body)
+	}
+
+	tests := []struct {
+		name                 string
+		_type                string
+		mockBehaviour        mockBehaviour
+		expectedCodeStatus   int
+		expectedResponseBody string
+	}{
+		{
+			name:  "ok",
+			_type: "",
+			mockBehaviour: func(s *mockService.MockTransactionCategories) {
+				s.EXPECT().List(context.Background()).Return(categories, nil)
+			},
+			expectedCodeStatus:   200,
+			expectedResponseBody: setResponseBody(categories),
+		},
+		{
+			name:  "ok",
+			_type: "expense",
+			mockBehaviour: func(s *mockService.MockTransactionCategories) {
+				s.EXPECT().ListByType(context.Background(), domain.Expense).Return(categories, nil)
+			},
+			expectedCodeStatus:   200,
+			expectedResponseBody: setResponseBody(categories),
+		},
+		{
+			name:  "invalid type",
+			_type: "qwe",
+			mockBehaviour: func(s *mockService.MockTransactionCategories) {
+				s.EXPECT().ListByType(context.Background(), domain.TransactionType("qwe")).Return(categories, domain.ErrInvalidTransactionType)
+			},
+			expectedCodeStatus:   400,
+			expectedResponseBody: `{"message":"invalid type of transaction"}`,
+		},
+		{
+			name:  "error",
+			_type: "",
+			mockBehaviour: func(s *mockService.MockTransactionCategories) {
+				s.EXPECT().List(context.Background()).Return(categories, errors.New("general error"))
+			},
+			expectedCodeStatus:   500,
+			expectedResponseBody: `{"message":"general error"}`,
+		},
+
+		{
+			name:  "error",
+			_type: "expense",
+			mockBehaviour: func(s *mockService.MockTransactionCategories) {
+				s.EXPECT().ListByType(context.Background(), domain.Expense).Return(categories, errors.New("general error"))
+			},
+			expectedCodeStatus:   500,
+			expectedResponseBody: `{"message":"general error"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Init Dependencies
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			tcService := mockService.NewMockTransactionCategories(c)
+			tt.mockBehaviour(tcService)
+
+			services := &service.Services{TransactionCategories: tcService}
+			handler := &Handler{
+				s: services,
+			}
+
+			// Init Endpoint
+			r := gin.New()
+			r.GET("/transaction-categories", handler.listTransactionCategories)
+
+			// Create Request
+			w := httptest.NewRecorder()
+			queryString := ""
+
+			if tt._type != "" {
+				queryString = "?type=" + tt._type
+			}
+
+			req := httptest.NewRequest("GET", "/transaction-categories"+queryString, bytes.NewBufferString(""))
+
+			// Make Request
+			r.ServeHTTP(w, req)
+
+			// Assert
+			assert.Equal(t, tt.expectedCodeStatus, w.Code)
+			assert.Equal(t, tt.expectedResponseBody, w.Body.String())
+		})
+	}
+}
+
+func TestHandler_listTransactionTypes(t *testing.T) {
+	type mockBehaviour func(s *mockService.MockTransactionTypes)
+
+	types := []domain.TransactionType{
+		domain.Income,
+	}
+
+	setResponseBody := func(types []domain.TransactionType) string {
+		body, _ := json.Marshal(types)
+
+		return string(body)
+	}
+
+	tests := []struct {
+		name                 string
+		mockBehaviour        mockBehaviour
+		expectedCodeStatus   int
+		expectedResponseBody string
+	}{
+		{
+			name: "ok",
+			mockBehaviour: func(s *mockService.MockTransactionTypes) {
+				s.EXPECT().List(context.Background()).Return(types, nil)
+			},
+			expectedCodeStatus:   200,
+			expectedResponseBody: setResponseBody(types),
+		},
+		{
+			name: "error",
+			mockBehaviour: func(s *mockService.MockTransactionTypes) {
+				s.EXPECT().List(context.Background()).Return(types, errors.New("general error"))
+			},
+			expectedCodeStatus:   500,
+			expectedResponseBody: `{"message":"general error"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Init Dependencies
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			ttService := mockService.NewMockTransactionTypes(c)
+			tt.mockBehaviour(ttService)
+
+			services := &service.Services{TransactionTypes: ttService}
+			handler := &Handler{
+				s: services,
+			}
+
+			// Init Endpoint
+			r := gin.New()
+			r.GET("/transaction-types", handler.listTransactionTypes)
+
+			// Create Request
+			w := httptest.NewRecorder()
+			req := httptest.NewRequest("GET", "/transaction-types", bytes.NewBufferString(""))
 
 			// Make Request
 			r.ServeHTTP(w, req)
