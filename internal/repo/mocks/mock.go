@@ -7,6 +7,7 @@ package mock_repo
 import (
 	context "context"
 	reflect "reflect"
+	time "time"
 
 	gomock "github.com/golang/mock/gomock"
 	domain "github.com/lotostudio/financial-api/internal/domain"
@@ -163,18 +164,18 @@ func (mr *MockSessionsMockRecorder) GetByToken(ctx, token interface{}) *gomock.C
 }
 
 // Update mocks base method.
-func (m *MockSessions) Update(ctx context.Context, toUpdate domain.SessionToUpdate, id int64) (domain.Session, error) {
+func (m *MockSessions) Update(ctx context.Context, toUpdate domain.SessionToUpdate, userID int64) (domain.Session, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", ctx, toUpdate, id)
+	ret := m.ctrl.Call(m, "Update", ctx, toUpdate, userID)
 	ret0, _ := ret[0].(domain.Session)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Update indicates an expected call of Update.
-func (mr *MockSessionsMockRecorder) Update(ctx, toUpdate, id interface{}) *gomock.Call {
+func (mr *MockSessionsMockRecorder) Update(ctx, toUpdate, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockSessions)(nil).Update), ctx, toUpdate, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockSessions)(nil).Update), ctx, toUpdate, userID)
 }
 
 // MockCurrencies is a mock of Currencies interface.
@@ -467,6 +468,21 @@ func (mr *MockTransactionsMockRecorder) List(ctx, filter interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockTransactions)(nil).List), ctx, filter)
 }
 
+// Stats mocks base method.
+func (m *MockTransactions) Stats(ctx context.Context, filter domain.TransactionsFilter) ([]domain.TransactionStat, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Stats", ctx, filter)
+	ret0, _ := ret[0].([]domain.TransactionStat)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Stats indicates an expected call of Stats.
+func (mr *MockTransactionsMockRecorder) Stats(ctx, filter interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Stats", reflect.TypeOf((*MockTransactions)(nil).Stats), ctx, filter)
+}
+
 // MockTransactionCategories is a mock of TransactionCategories interface.
 type MockTransactionCategories struct {
 	ctrl     *gomock.Controller
@@ -571,4 +587,42 @@ func (m *MockTransactionTypes) List(ctx context.Context) ([]domain.TransactionTy
 func (mr *MockTransactionTypesMockRecorder) List(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockTransactionTypes)(nil).List), ctx)
+}
+
+// MockBalances is a mock of Balances interface.
+type MockBalances struct {
+	ctrl     *gomock.Controller
+	recorder *MockBalancesMockRecorder
+}
+
+// MockBalancesMockRecorder is the mock recorder for MockBalances.
+type MockBalancesMockRecorder struct {
+	mock *MockBalances
+}
+
+// NewMockBalances creates a new mock instance.
+func NewMockBalances(ctrl *gomock.Controller) *MockBalances {
+	mock := &MockBalances{ctrl: ctrl}
+	mock.recorder = &MockBalancesMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockBalances) EXPECT() *MockBalancesMockRecorder {
+	return m.recorder
+}
+
+// Get mocks base method.
+func (m *MockBalances) Get(ctx context.Context, accountID int64, date time.Time) (domain.Balance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Get", ctx, accountID, date)
+	ret0, _ := ret[0].(domain.Balance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get indicates an expected call of Get.
+func (mr *MockBalancesMockRecorder) Get(ctx, accountID, date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockBalances)(nil).Get), ctx, accountID, date)
 }

@@ -24,6 +24,10 @@ func (s *TransactionsService) List(ctx context.Context, filter domain.Transactio
 	return s.repo.List(ctx, filter)
 }
 
+func (s *TransactionsService) Stats(ctx context.Context, filter domain.TransactionsFilter) ([]domain.TransactionStat, error) {
+	return s.repo.Stats(ctx, filter)
+}
+
 func (s *TransactionsService) Create(ctx context.Context, toCreate domain.TransactionToCreate, userID int64,
 	categoryId *int64, creditId *int64, debitId *int64) (domain.Transaction, error) {
 
@@ -162,4 +166,40 @@ func (s *TransactionsService) Delete(ctx context.Context, id int64, userID int64
 	}
 
 	return s.repo.Delete(ctx, id)
+}
+
+type TransactionCategoryService struct {
+	repo repo.TransactionCategories
+}
+
+func newTransactionCategoriesService(repo repo.TransactionCategories) *TransactionCategoryService {
+	return &TransactionCategoryService{
+		repo: repo,
+	}
+}
+
+func (s *TransactionCategoryService) List(ctx context.Context) ([]domain.TransactionCategory, error) {
+	return s.repo.List(ctx)
+}
+
+func (s *TransactionCategoryService) ListByType(ctx context.Context, _type domain.TransactionType) ([]domain.TransactionCategory, error) {
+	if err := _type.Validate(); err != nil {
+		return nil, err
+	}
+
+	return s.repo.ListByType(ctx, _type)
+}
+
+type TransactionTypesService struct {
+	repo repo.TransactionTypes
+}
+
+func newTransactionTypesService(repo repo.TransactionTypes) *TransactionTypesService {
+	return &TransactionTypesService{
+		repo: repo,
+	}
+}
+
+func (s *TransactionTypesService) List(ctx context.Context) ([]domain.TransactionType, error) {
+	return s.repo.List(ctx)
 }

@@ -39,6 +39,20 @@ func TestTransactionsService_List(t *testing.T) {
 	require.IsType(t, []domain.Transaction{}, categories)
 }
 
+func TestTransactionsService_Stats(t *testing.T) {
+	s, tRepo, _, _ := mockTransactionsService(t)
+
+	ctx := context.Background()
+	filter := domain.TransactionsFilter{}
+
+	tRepo.EXPECT().Stats(ctx, filter).Return([]domain.TransactionStat{}, nil)
+
+	stats, err := s.Stats(ctx, filter)
+
+	require.NoError(t, err)
+	require.IsType(t, []domain.TransactionStat{}, stats)
+}
+
 func TestTransactionsService_CreateIncome(t *testing.T) {
 	s, tRepo, aRepo, tcRepo := mockTransactionsService(t)
 
@@ -397,4 +411,79 @@ func TestTransactionsService_DeleteErr(t *testing.T) {
 	err := s.Delete(ctx, id, userId)
 
 	require.ErrorIs(t, err, errDefault)
+}
+
+func mockTransactionCategoriesService(t *testing.T) (*TransactionCategoryService, *mockRepo.MockTransactionCategories) {
+	t.Helper()
+
+	mockCtl := gomock.NewController(t)
+	defer mockCtl.Finish()
+
+	tcRepo := mockRepo.NewMockTransactionCategories(mockCtl)
+
+	s := newTransactionCategoriesService(tcRepo)
+
+	return s, tcRepo
+}
+
+func TestTransactionCategoryService_List(t *testing.T) {
+	s, ctRepo := mockTransactionCategoriesService(t)
+
+	ctx := context.Background()
+
+	ctRepo.EXPECT().List(ctx).Return([]domain.TransactionCategory{}, nil)
+
+	categories, err := s.List(ctx)
+
+	require.NoError(t, err)
+	require.IsType(t, []domain.TransactionCategory{}, categories)
+}
+
+func TestTransactionCategoryService_ListByType(t *testing.T) {
+	s, ctRepo := mockTransactionCategoriesService(t)
+
+	ctx := context.Background()
+
+	ctRepo.EXPECT().ListByType(ctx, domain.Transfer).Return([]domain.TransactionCategory{}, nil)
+
+	categories, err := s.ListByType(ctx, domain.Transfer)
+
+	require.NoError(t, err)
+	require.IsType(t, []domain.TransactionCategory{}, categories)
+}
+
+func TestTransactionCategoryService_ListByTypeInvalidType(t *testing.T) {
+	s, _ := mockTransactionCategoriesService(t)
+
+	ctx := context.Background()
+
+	_, err := s.ListByType(ctx, "qwe")
+
+	require.ErrorIs(t, err, domain.ErrInvalidTransactionType)
+}
+
+func mockTransactionTypesService(t *testing.T) (*TransactionTypesService, *mockRepo.MockTransactionTypes) {
+	t.Helper()
+
+	mockCtl := gomock.NewController(t)
+	defer mockCtl.Finish()
+
+	ttRepo := mockRepo.NewMockTransactionTypes(mockCtl)
+
+	s := newTransactionTypesService(ttRepo)
+
+	return s, ttRepo
+}
+
+func TestTransactionTypesService_List(t *testing.T) {
+	s, ttRepo := mockTransactionTypesService(t)
+
+	ctx := context.Background()
+
+	ttRepo.EXPECT().List(ctx).Return([]domain.TransactionType{}, nil)
+
+	types, err := s.List(ctx)
+
+	require.NoError(t, err)
+	require.IsType(t, []domain.TransactionType{}, types)
 }

@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.0.2] - 2022-02-21
+### Added
+- Statement.
+- Grouped transaction sums by categories.
+
+### Changed
+- go version to 1.17.6
+
 ## [1.0.1] - 2022-01-12
 ### Added
 - Saving balances each day.
@@ -16,3 +24,4 @@ All notable changes to this project will be documented in this file.
 [unreleased]: https://github.com/lotostudio/financial-api/tree/develop
 [1.0.0]: https://github.com/lotostudio/financial-api/releases/tag/v1.0.0
 [1.0.1]: https://github.com/lotostudio/financial-api/releases/tag/v1.0.1
+[1.0.2]: https://github.com/lotostudio/financial-api/releases/tag/v1.0.2

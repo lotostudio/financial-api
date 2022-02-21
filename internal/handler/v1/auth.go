@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/lotostudio/financial-api/internal/domain"
 	"github.com/lotostudio/financial-api/internal/repo"
@@ -37,14 +38,14 @@ func (h *Handler) register(c *gin.Context) {
 		return
 	}
 
-	user, err := h.services.Register(c.Request.Context(), toCreate)
+	user, err := h.s.Register(c.Request.Context(), toCreate)
+
+	if errors.Is(err, repo.ErrUserAlreadyExists) {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	if err != nil {
-		if err == repo.ErrUserAlreadyExists {
-			newResponse(c, http.StatusBadRequest, err.Error())
-			return
-		}
-
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -73,14 +74,14 @@ func (h *Handler) login(c *gin.Context) {
 		return
 	}
 
-	tokens, err := h.services.Login(c.Request.Context(), toLogin)
+	tokens, err := h.s.Login(c.Request.Context(), toLogin)
+
+	if errors.Is(err, repo.ErrUserNotFound) {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	if err != nil {
-		if err == repo.ErrUserNotFound {
-			newResponse(c, http.StatusBadRequest, err.Error())
-			return
-		}
-
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -112,14 +113,14 @@ func (h *Handler) refresh(c *gin.Context) {
 		return
 	}
 
-	tokens, err := h.services.Refresh(c.Request.Context(), refreshToken)
+	tokens, err := h.s.Refresh(c.Request.Context(), refreshToken)
+
+	if errors.Is(err, repo.ErrSessionNotFound) || errors.Is(err, service.ErrRefreshTokenExpired) {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	if err != nil {
-		if err == repo.ErrSessionNotFound || err == service.ErrRefreshTokenExpired {
-			newResponse(c, http.StatusBadRequest, err.Error())
-			return
-		}
-
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}

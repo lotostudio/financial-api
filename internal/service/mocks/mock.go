@@ -403,6 +403,21 @@ func (mr *MockTransactionsMockRecorder) List(ctx, filter interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockTransactions)(nil).List), ctx, filter)
 }
 
+// Stats mocks base method.
+func (m *MockTransactions) Stats(ctx context.Context, filter domain.TransactionsFilter) ([]domain.TransactionStat, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Stats", ctx, filter)
+	ret0, _ := ret[0].([]domain.TransactionStat)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Stats indicates an expected call of Stats.
+func (mr *MockTransactionsMockRecorder) Stats(ctx, filter interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Stats", reflect.TypeOf((*MockTransactions)(nil).Stats), ctx, filter)
+}
+
 // MockTransactionCategories is a mock of TransactionCategories interface.
 type MockTransactionCategories struct {
 	ctrl     *gomock.Controller
@@ -492,4 +507,42 @@ func (m *MockTransactionTypes) List(ctx context.Context) ([]domain.TransactionTy
 func (mr *MockTransactionTypesMockRecorder) List(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockTransactionTypes)(nil).List), ctx)
+}
+
+// MockStats is a mock of Stats interface.
+type MockStats struct {
+	ctrl     *gomock.Controller
+	recorder *MockStatsMockRecorder
+}
+
+// MockStatsMockRecorder is the mock recorder for MockStats.
+type MockStatsMockRecorder struct {
+	mock *MockStats
+}
+
+// NewMockStats creates a new mock instance.
+func NewMockStats(ctrl *gomock.Controller) *MockStats {
+	mock := &MockStats{ctrl: ctrl}
+	mock.recorder = &MockStatsMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockStats) EXPECT() *MockStatsMockRecorder {
+	return m.recorder
+}
+
+// Statement mocks base method.
+func (m *MockStats) Statement(ctx context.Context, filter domain.TransactionsFilter) (domain.Statement, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Statement", ctx, filter)
+	ret0, _ := ret[0].(domain.Statement)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Statement indicates an expected call of Statement.
+func (mr *MockStatsMockRecorder) Statement(ctx, filter interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Statement", reflect.TypeOf((*MockStats)(nil).Statement), ctx, filter)
 }

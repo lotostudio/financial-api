@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/lotostudio/financial-api/internal/domain"
 	"github.com/lotostudio/financial-api/internal/repo"
@@ -22,11 +23,26 @@ func (h *Handler) initAccountsRoutes(api *gin.RouterGroup) {
 			account.PUT("", h.updateAccount)
 			account.DELETE("", h.deleteAccount)
 
+			statement := account.Group("/statement")
+			{
+				statement.GET("", h.getStatement)
+			}
+
 			transactions := account.Group("/transactions")
 			{
 				transactions.GET("", h.listTransactionsOfAccount)
 			}
 		}
+	}
+
+	types := api.Group("/account-types")
+	{
+		types.GET("", h.listAccountTypes)
+	}
+
+	currencies := api.Group("/currencies")
+	{
+		currencies.GET("", h.listCurrencies)
 	}
 }
 
@@ -56,7 +72,7 @@ func (h *Handler) listAccounts(c *gin.Context) {
 		return
 	}
 
-	accounts, err := h.services.Accounts.List(c.Request.Context(), userId)
+	accounts, err := h.s.Accounts.List(c.Request.Context(), userId)
 
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
@@ -92,7 +108,7 @@ func (h *Handler) listGropedAccounts(c *gin.Context) {
 		return
 	}
 
-	accounts, err := h.services.Accounts.ListGrouped(c.Request.Context(), userId)
+	accounts, err := h.s.Accounts.ListGrouped(c.Request.Context(), userId)
 
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
@@ -152,19 +168,24 @@ func (h *Handler) createAccount(c *gin.Context) {
 		return
 	}
 
-	account, err := h.services.Accounts.Create(c.Request.Context(), toCreate, userId, int(currencyId))
+	account, err := h.s.Accounts.Create(c.Request.Context(), toCreate, userId, int(currencyId))
+
+	if errors.Is(err, repo.ErrCurrencyNotFound) {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if errors.Is(err, service.ErrInvalidLoanData) || errors.Is(err, service.ErrInvalidDepositData) {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if errors.Is(err, service.ErrAccountCountLimited) {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	if err != nil {
-		if err == repo.ErrCurrencyNotFound {
-			newResponse(c, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		if err == service.ErrInvalidLoanData || err == service.ErrInvalidDepositData || err == service.ErrAccountCountLimited {
-			newResponse(c, http.StatusBadRequest, err.Error())
-			return
-		}
-
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -215,19 +236,19 @@ func (h *Handler) getAccount(c *gin.Context) {
 		return
 	}
 
-	accounts, err := h.services.Accounts.Get(c.Request.Context(), id, userId)
+	accounts, err := h.s.Accounts.Get(c.Request.Context(), id, userId)
+
+	if errors.Is(err, service.ErrAccountForbidden) {
+		newResponse(c, http.StatusForbidden, err.Error())
+		return
+	}
+
+	if errors.Is(err, repo.ErrAccountNotFound) {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	if err != nil {
-		if err == service.ErrAccountForbidden {
-			newResponse(c, http.StatusForbidden, err.Error())
-			return
-		}
-
-		if err == repo.ErrAccountNotFound {
-			newResponse(c, http.StatusBadRequest, err.Error())
-			return
-		}
-
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -286,24 +307,24 @@ func (h *Handler) updateAccount(c *gin.Context) {
 		return
 	}
 
-	accounts, err := h.services.Accounts.Update(c.Request.Context(), toUpdate, id, userId)
+	accounts, err := h.s.Accounts.Update(c.Request.Context(), toUpdate, id, userId)
+
+	if errors.Is(err, service.ErrAccountForbidden) {
+		newResponse(c, http.StatusForbidden, err.Error())
+		return
+	}
+
+	if errors.Is(err, repo.ErrAccountNotFound) {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if errors.Is(err, service.ErrInvalidLoanData) || errors.Is(err, service.ErrInvalidDepositData) {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	if err != nil {
-		if err == service.ErrAccountForbidden {
-			newResponse(c, http.StatusForbidden, err.Error())
-			return
-		}
-
-		if err == repo.ErrAccountNotFound {
-			newResponse(c, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		if err == service.ErrInvalidLoanData || err == service.ErrInvalidDepositData {
-			newResponse(c, http.StatusBadRequest, err.Error())
-			return
-		}
-
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -354,22 +375,62 @@ func (h *Handler) deleteAccount(c *gin.Context) {
 		return
 	}
 
-	err = h.services.Accounts.Delete(c.Request.Context(), id, userId)
+	err = h.s.Accounts.Delete(c.Request.Context(), id, userId)
+
+	if errors.Is(err, service.ErrAccountForbidden) {
+		newResponse(c, http.StatusForbidden, err.Error())
+		return
+	}
+
+	if errors.Is(err, repo.ErrAccountNotFound) {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	if err != nil {
-		if err == service.ErrAccountForbidden {
-			newResponse(c, http.StatusForbidden, err.Error())
-			return
-		}
-
-		if err == repo.ErrAccountNotFound {
-			newResponse(c, http.StatusBadRequest, err.Error())
-			return
-		}
-
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	c.Status(http.StatusNoContent)
+}
+
+// @Summary List account types
+// @Tags accounts
+// @Description List all account types
+// @ID listAccountTypes
+// @Accept json
+// @Produce json
+// @Success 200 {array} domain.AccountType "Operation finished successfully"
+// @Failure 500 {object} response "Server error"
+// @Router /accounts-types [get]
+func (h *Handler) listAccountTypes(c *gin.Context) {
+	accounts, err := h.s.AccountTypes.List(c.Request.Context())
+
+	if err != nil {
+		newResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, accounts)
+}
+
+// @Summary List currencies
+// @Tags currencies
+// @Description List all currencies
+// @ID listCurrencies
+// @Accept json
+// @Produce json
+// @Success 200 {array} domain.Currency "Operation finished successfully"
+// @Failure 500 {object} response "Server error"
+// @Router /currencies [get]
+func (h *Handler) listCurrencies(c *gin.Context) {
+	accounts, err := h.s.Currencies.List(c.Request.Context())
+
+	if err != nil {
+		newResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, accounts)
 }
