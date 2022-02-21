@@ -162,3 +162,31 @@ func (s *AccountsService) Delete(ctx context.Context, id int64, userID int64) er
 
 	return s.repo.Delete(ctx, id)
 }
+
+type AccountTypesService struct {
+	repo repo.AccountTypes
+}
+
+func newAccountTypesService(repo repo.AccountTypes) *AccountTypesService {
+	return &AccountTypesService{
+		repo: repo,
+	}
+}
+
+func (s *AccountTypesService) List(ctx context.Context) ([]domain.AccountType, error) {
+	return s.repo.List(ctx)
+}
+
+type CurrenciesService struct {
+	repo repo.Currencies
+}
+
+func newCurrenciesService(repo repo.Currencies) *CurrenciesService {
+	return &CurrenciesService{
+		repo: repo,
+	}
+}
+
+func (s *CurrenciesService) List(ctx context.Context) ([]domain.Currency, error) {
+	return s.repo.List(ctx)
+}

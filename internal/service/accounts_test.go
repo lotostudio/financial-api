@@ -404,3 +404,55 @@ func TestAccountsService_DeleteInstanceError(t *testing.T) {
 
 	require.Error(t, err, repo.ErrAccountNotFound)
 }
+
+func mockAccountTypesService(t *testing.T) (*AccountTypesService, *mockRepo.MockAccountTypes) {
+	t.Helper()
+
+	mockCtl := gomock.NewController(t)
+	defer mockCtl.Finish()
+
+	tRepo := mockRepo.NewMockAccountTypes(mockCtl)
+
+	s := newAccountTypesService(tRepo)
+
+	return s, tRepo
+}
+
+func TestAccountTypesService_List(t *testing.T) {
+	s, tRepo := mockAccountTypesService(t)
+
+	ctx := context.Background()
+
+	tRepo.EXPECT().List(ctx).Return([]domain.AccountType{}, nil)
+
+	types, err := s.List(ctx)
+
+	require.NoError(t, err)
+	require.IsType(t, []domain.AccountType{}, types)
+}
+
+func mockCurrenciesService(t *testing.T) (*CurrenciesService, *mockRepo.MockCurrencies) {
+	t.Helper()
+
+	mockCtl := gomock.NewController(t)
+	defer mockCtl.Finish()
+
+	cRepo := mockRepo.NewMockCurrencies(mockCtl)
+
+	s := newCurrenciesService(cRepo)
+
+	return s, cRepo
+}
+
+func TestCurrenciesService_List(t *testing.T) {
+	s, cRepo := mockCurrenciesService(t)
+
+	ctx := context.Background()
+
+	cRepo.EXPECT().List(ctx).Return([]domain.Currency{}, nil)
+
+	accounts, err := s.List(ctx)
+
+	require.NoError(t, err)
+	require.IsType(t, []domain.Currency{}, accounts)
+}

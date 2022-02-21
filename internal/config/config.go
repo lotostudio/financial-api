@@ -68,16 +68,18 @@ func (c *Config) readFile(path string) {
 	f, err := os.Open(path)
 
 	if err != nil {
-		processError(err)
+		log.Fatal(err)
 	}
 
-	defer f.Close()
+	defer func() {
+		_ = f.Close()
+	}()
 
 	err = yaml.NewDecoder(f).Decode(c)
 
 	if err != nil {
 		log.Println(c)
-		processError(err)
+		log.Fatal(err)
 	}
 }
 
@@ -88,7 +90,7 @@ func (c *Config) readEnv() {
 	err := envconfig.Process("", c)
 
 	if err != nil {
-		processError(err)
+		log.Fatal(err)
 	}
 }
 
@@ -97,9 +99,4 @@ func loadFromEnvFile() {
 	if err := godotenv.Load(); err != nil {
 		log.Debug("Error loading .env file")
 	}
-}
-
-func processError(err error) {
-	log.Error(err)
-	os.Exit(2)
 }

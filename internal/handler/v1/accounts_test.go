@@ -78,7 +78,7 @@ func TestHandler_listAccounts(t *testing.T) {
 
 			services := &service.Services{Accounts: aService}
 			handler := &Handler{
-				services: services,
+				s: services,
 			}
 
 			// Init Endpoint
@@ -157,7 +157,7 @@ func TestHandler_listGroupedAccounts(t *testing.T) {
 
 			services := &service.Services{Accounts: aService}
 			handler := &Handler{
-				services: services,
+				s: services,
 			}
 
 			// Init Endpoint
@@ -329,7 +329,7 @@ func TestHandler_createAccount(t *testing.T) {
 
 			services := &service.Services{Accounts: aService}
 			handler := &Handler{
-				services: services,
+				s: services,
 			}
 
 			// Init Endpoint
@@ -420,7 +420,7 @@ func TestHandler_getAccount(t *testing.T) {
 
 			services := &service.Services{Accounts: aService}
 			handler := &Handler{
-				services: services,
+				s: services,
 			}
 
 			// Init Endpoint
@@ -567,7 +567,7 @@ func TestHandler_updateAccount(t *testing.T) {
 
 			services := &service.Services{Accounts: aService}
 			handler := &Handler{
-				services: services,
+				s: services,
 			}
 
 			// Init Endpoint
@@ -644,7 +644,7 @@ func TestHandler_deleteAccount(t *testing.T) {
 
 			services := &service.Services{Accounts: aService}
 			handler := &Handler{
-				services: services,
+				s: services,
 			}
 
 			// Init Endpoint
@@ -656,6 +656,149 @@ func TestHandler_deleteAccount(t *testing.T) {
 			// Create Request
 			w := httptest.NewRecorder()
 			req := httptest.NewRequest("DELETE", fmt.Sprintf("/accounts/%d", accountID), bytes.NewBufferString(""))
+
+			// Make Request
+			r.ServeHTTP(w, req)
+
+			// Assert
+			assert.Equal(t, tt.expectedCodeStatus, w.Code)
+			assert.Equal(t, tt.expectedResponseBody, w.Body.String())
+		})
+	}
+}
+
+func TestHandler_listAccountTypes(t *testing.T) {
+	type mockBehaviour func(s *mockService.MockAccountTypes)
+
+	types := []domain.AccountType{
+		domain.Card,
+	}
+
+	setResponseBody := func(currencies []domain.AccountType) string {
+		body, _ := json.Marshal(currencies)
+
+		return string(body)
+	}
+
+	tests := []struct {
+		name                 string
+		mockBehaviour        mockBehaviour
+		expectedCodeStatus   int
+		expectedResponseBody string
+	}{
+		{
+			name: "ok",
+			mockBehaviour: func(s *mockService.MockAccountTypes) {
+				s.EXPECT().List(context.Background()).Return(types, nil)
+			},
+			expectedCodeStatus:   200,
+			expectedResponseBody: setResponseBody(types),
+		},
+		{
+			name: "error",
+			mockBehaviour: func(s *mockService.MockAccountTypes) {
+				s.EXPECT().List(context.Background()).Return(types, errors.New("general error"))
+			},
+			expectedCodeStatus:   500,
+			expectedResponseBody: `{"message":"general error"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Init Dependencies
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			aService := mockService.NewMockAccountTypes(c)
+			tt.mockBehaviour(aService)
+
+			services := &service.Services{AccountTypes: aService}
+			handler := &Handler{
+				s: services,
+			}
+
+			// Init Endpoint
+			r := gin.New()
+			r.GET("/account-types", handler.listAccountTypes)
+
+			// Create Request
+			w := httptest.NewRecorder()
+			req := httptest.NewRequest("GET", "/account-types", bytes.NewBufferString(""))
+
+			// Make Request
+			r.ServeHTTP(w, req)
+
+			// Assert
+			assert.Equal(t, tt.expectedCodeStatus, w.Code)
+			assert.Equal(t, tt.expectedResponseBody, w.Body.String())
+		})
+	}
+}
+
+func TestHandler_listCurrencies(t *testing.T) {
+	type mockBehaviour func(s *mockService.MockCurrencies)
+
+	currencies := []domain.Currency{
+		{
+			ID:   1,
+			Code: "KZT",
+		},
+	}
+
+	setResponseBody := func(currencies []domain.Currency) string {
+		body, _ := json.Marshal(currencies)
+
+		return string(body)
+	}
+
+	tests := []struct {
+		name                 string
+		mockBehaviour        mockBehaviour
+		expectedCodeStatus   int
+		expectedResponseBody string
+	}{
+		{
+			name: "ok",
+			mockBehaviour: func(s *mockService.MockCurrencies) {
+				s.EXPECT().List(context.Background()).Return(currencies, nil)
+			},
+			expectedCodeStatus:   200,
+			expectedResponseBody: setResponseBody(currencies),
+		},
+		{
+			name: "error",
+			mockBehaviour: func(s *mockService.MockCurrencies) {
+				s.EXPECT().List(context.Background()).Return(currencies, errors.New("general error"))
+			},
+			expectedCodeStatus:   500,
+			expectedResponseBody: `{"message":"general error"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Init Dependencies
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			cService := mockService.NewMockCurrencies(c)
+			tt.mockBehaviour(cService)
+
+			services := &service.Services{Currencies: cService}
+			handler := &Handler{
+				s: services,
+			}
+
+			// Init Endpoint
+			r := gin.New()
+			r.GET("/currencies", func(c *gin.Context) {
+				c.Set(userCtx, strconv.FormatInt(userID, 10))
+			}, handler.listCurrencies)
+
+			// Create Request
+			w := httptest.NewRecorder()
+			req := httptest.NewRequest("GET", "/currencies", bytes.NewBufferString(""))
 
 			// Make Request
 			r.ServeHTTP(w, req)

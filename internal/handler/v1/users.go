@@ -30,7 +30,7 @@ func (h *Handler) initUsersRoutes(api *gin.RouterGroup) {
 // @Failure 500 {object} response "Server error"
 // @Router /users [get]
 func (h *Handler) listUsers(c *gin.Context) {
-	users, err := h.services.Users.List(c.Request.Context())
+	users, err := h.s.Users.List(c.Request.Context())
 
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
@@ -65,7 +65,7 @@ func (h *Handler) getMe(c *gin.Context) {
 		return
 	}
 
-	user, err := h.services.Users.Get(c.Request.Context(), userId)
+	user, err := h.s.Users.Get(c.Request.Context(), userId)
 
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
@@ -109,7 +109,7 @@ func (h *Handler) partialUpdateMe(c *gin.Context) {
 		return
 	}
 
-	user, err := h.services.Users.UpdatePassword(c.Request.Context(), userId, toUpdate)
+	user, err := h.s.Users.UpdatePassword(c.Request.Context(), userId, toUpdate)
 
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())

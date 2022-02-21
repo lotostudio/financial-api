@@ -58,5 +58,5 @@ func (h *Handler) parseAuthHeader(c *gin.Context) (string, error) {
 		return "", errors.New("token is empty")
 	}
 
-	return h.tokenManager.Decode(headerParts[1])
+	return h.tkn.Decode(headerParts[1])
 }

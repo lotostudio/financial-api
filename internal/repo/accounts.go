@@ -3,8 +3,10 @@ package repo
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"github.com/jmoiron/sqlx"
 	"github.com/lotostudio/financial-api/internal/domain"
+	"time"
 )
 
 type AccountsRepo struct {
@@ -222,4 +224,104 @@ func (r *AccountsRepo) Delete(ctx context.Context, id int64) error {
 	_, err := r.db.ExecContext(ctx, "DELETE FROM accounts WHERE id = $1", id)
 
 	return err
+}
+
+type AccountTypesRepo struct {
+	db *sqlx.DB
+}
+
+func newAccountTypesRepo(db *sqlx.DB) *AccountTypesRepo {
+	return &AccountTypesRepo{
+		db: db,
+	}
+}
+
+func (r *AccountTypesRepo) List(ctx context.Context) ([]domain.AccountType, error) {
+	types := make([]domain.AccountType, 0)
+
+	if err := r.db.SelectContext(ctx, &types, "SELECT unnest(enum_range(NULL::account_type))"); err != nil {
+		return nil, err
+	}
+
+	return types, nil
+}
+
+type BalancesRepo struct {
+	db *sqlx.DB
+}
+
+func newBalancesRepo(db *sqlx.DB) *BalancesRepo {
+	return &BalancesRepo{
+		db: db,
+	}
+}
+
+func (r *BalancesRepo) Get(ctx context.Context, accountID int64, date time.Time) (domain.Balance, error) {
+	var b domain.Balance
+
+	if err := r.db.GetContext(ctx, &b, `
+	SELECT account_id, date, value
+	FROM balances
+	WHERE account_id = $1 AND date < $2
+	ORDER BY date DESC LIMIT 1`, accountID, date); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.Balance{}, ErrBalanceNotFound
+		}
+
+		return b, err
+	}
+
+	return b, nil
+}
+
+// updateBalance actualize account balance into balances table with recent value
+func updateBalance(ctx context.Context, tx *sql.Tx, id int64, balance float64) error {
+	// update new entry in balances table for today
+	if _, err := tx.ExecContext(ctx,
+		`INSERT INTO balances(account_id, date, value) VALUES ($1, $2, $3) 
+				ON CONFLICT (account_id, date) DO UPDATE SET value = excluded.value`,
+		id, time.Now(), balance); err != nil {
+
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	return nil
+}
+
+type CurrenciesRepo struct {
+	db *sqlx.DB
+}
+
+func newCurrenciesRepo(db *sqlx.DB) *CurrenciesRepo {
+	return &CurrenciesRepo{
+		db: db,
+	}
+}
+
+func (r *CurrenciesRepo) List(ctx context.Context) ([]domain.Currency, error) {
+	currencies := make([]domain.Currency, 0)
+
+	if err := r.db.SelectContext(ctx, &currencies, "SELECT c.id, c.code FROM currencies c"); err != nil {
+		return nil, err
+	}
+
+	return currencies, nil
+}
+
+func (r *CurrenciesRepo) Get(ctx context.Context, id int) (domain.Currency, error) {
+	var currency domain.Currency
+
+	if err := r.db.GetContext(ctx, &currency, `SELECT c.id, c.code FROM currencies c WHERE c.id = $1`, id); err != nil {
+		if err == sql.ErrNoRows {
+			return domain.Currency{}, ErrCurrencyNotFound
+		}
+
+		return currency, err
+	}
+
+	return currency, nil
 }
